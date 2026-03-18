@@ -2,7 +2,7 @@
  * @file storage.js
  * @description Camada de abstração sobre o `localStorage` para persistência local dos dados do app.
  *
- * Todas as chaves do localStorage são prefixadas com `gerador_` para evitar colisões.
+ * Todas as chaves do localStorage são prefixadas com `ditto_` para evitar colisões.
  *
  * @module utils/storage
  */
@@ -11,9 +11,9 @@
 
 /** Chaves do localStorage usadas pelo app. */
 const KEYS = {
-  API_KEY: 'gerador_api_key',
-  PHRASES: 'gerador_phrases',
-  STATS:   'gerador_stats',
+  API_KEY: 'ditto_api_key',
+  PHRASES: 'ditto_phrases',
+  STATS:   'ditto_stats',
 }
 
 export const storage = {
