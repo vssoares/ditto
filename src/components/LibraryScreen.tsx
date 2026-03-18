@@ -1,16 +1,9 @@
 import { useState } from 'react'
 import { storage } from '../utils/storage'
+import type { Phrase } from '../utils/types'
 import { Button, Badge, Card, FilterPill, EmptyState } from './ui'
-/** @typedef {import('../utils/types').Phrase} Phrase */
 
-/**
- * Formata um timestamp Unix em texto relativo (ex.: "em 3 dias", "vencido").
- *
- * @param {number|undefined} ts  - Timestamp em ms.
- * @param {number}           now - Timestamp atual em ms.
- * @returns {string}
- */
-function formatNextReview(ts, now) {
+function formatNextReview(ts: number | undefined, now: number): string {
   if (!ts) return 'novo'
   const diff = ts - now
   if (diff <= 0) return 'vencido'
@@ -20,31 +13,28 @@ function formatNextReview(ts, now) {
   return `em ${days} dias`
 }
 
-/**
- * Tela de biblioteca — exibe todas as frases salvas com filtros e suporte a expansão de detalhes.
- *
- * @param {object}   props
- * @param {Function} props.onStudy - `(phrases: Phrase[]) => void` — inicia sessão de estudo.
- */
-export default function LibraryScreen({ onStudy }) {
-  const [phrases]    = useState(storage.getPhrases())
-  const [filter, setFilter]     = useState('all')
-  const [expandedId, setExpandedId] = useState(null)
+interface LibraryScreenProps {
+  onStudy: (phrases: Phrase[]) => void
+}
+
+export default function LibraryScreen({ onStudy }: LibraryScreenProps) {
+  const [phrases] = useState<Phrase[]>(() => storage.getPhrases())
+  const [filter, setFilter] = useState<'all' | 'due' | 'learned'>('all')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const now = Date.now()
 
   const dueCount = phrases.filter((p) => !p.nextReview || p.nextReview <= now).length
 
-  /** Opções de filtro com contagens dinâmicas. */
   const FILTERS = [
-    { id: 'all',     label: `Todas (${phrases.length})` },
-    { id: 'due',     label: `Revisar (${dueCount})` },
-    { id: 'learned', label: 'Aprendidas' },
+    { id: 'all' as const, label: `Todas (${phrases.length})` },
+    { id: 'due' as const, label: `Revisar (${dueCount})` },
+    { id: 'learned' as const, label: 'Aprendidas' },
   ]
 
   const filtered = phrases.filter((p) => {
-    if (filter === 'due')     return !p.nextReview || p.nextReview <= now
-    if (filter === 'learned') return p.nextReview && p.nextReview > now && p.repetitions >= 3
+    if (filter === 'due') return !p.nextReview || p.nextReview <= now
+    if (filter === 'learned') return !!(p.nextReview && p.nextReview > now && (p.repetitions ?? 0) >= 3)
     return true
   })
 
@@ -91,12 +81,12 @@ export default function LibraryScreen({ onStudy }) {
           >
             <div className="p-4 flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-display text-chalk text-lg truncate">"{phrase.english}"</p>
+                <p className="font-display text-chalk text-lg truncate">&quot;{phrase.english}&quot;</p>
 
                 {expandedId === phrase.id && (
                   <div className="mt-3 space-y-2 animate-fade-in">
                     <p className="font-sans text-amber-400/80 text-sm italic">
-                      "{phrase.portuguese}"
+                      &quot;{phrase.portuguese}&quot;
                     </p>
                     {phrase.tip && (
                       <p className="font-sans text-xs text-chalk/40 bg-ink-900 rounded-lg px-3 py-2">

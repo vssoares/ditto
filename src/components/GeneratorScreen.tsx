@@ -1,49 +1,40 @@
 import { useState } from 'react'
 import { storage } from '../utils/storage'
+import type { Phrase } from '../utils/types'
 import { Button, Label, SelectOption, ErrorBanner } from './ui'
-/** @typedef {import('../utils/types').Phrase} Phrase */
 
-/**
- * Tópicos disponíveis para geração de frases.
- * @type {{ id: string, label: string, icon: string }[]}
- */
 const TOPICS = [
-  { id: 'daily',    label: 'Cotidiano',   icon: '☀' },
-  { id: 'work',     label: 'Trabalho',    icon: '💼' },
-  { id: 'travel',   label: 'Viagem',      icon: '✈' },
-  { id: 'food',     label: 'Comida',      icon: '🍽' },
-  { id: 'tech',     label: 'Tecnologia',  icon: '💻' },
-  { id: 'social',   label: 'Social',      icon: '💬' },
-  { id: 'health',   label: 'Saúde',       icon: '🏃' },
-  { id: 'academic', label: 'Acadêmico',   icon: '📚' },
-]
+  { id: 'daily', label: 'Cotidiano', icon: '☀' },
+  { id: 'work', label: 'Trabalho', icon: '💼' },
+  { id: 'travel', label: 'Viagem', icon: '✈' },
+  { id: 'food', label: 'Comida', icon: '🍽' },
+  { id: 'tech', label: 'Tecnologia', icon: '💻' },
+  { id: 'social', label: 'Social', icon: '💬' },
+  { id: 'health', label: 'Saúde', icon: '🏃' },
+  { id: 'academic', label: 'Acadêmico', icon: '📚' },
+] as const
 
-/**
- * Níveis de proficiência disponíveis.
- * @type {{ id: string, label: string, desc: string }[]}
- */
 const LEVELS = [
-  { id: 'beginner',     label: 'Iniciante',     desc: 'A1 / A2' },
-  { id: 'intermediate', label: 'Intermediário',  desc: 'B1 / B2' },
-  { id: 'advanced',     label: 'Avançado',       desc: 'C1 / C2' },
-]
+  { id: 'beginner', label: 'Iniciante', desc: 'A1 / A2' },
+  { id: 'intermediate', label: 'Intermediário', desc: 'B1 / B2' },
+  { id: 'advanced', label: 'Avançado', desc: 'C1 / C2' },
+] as const
 
-/** Opções de quantidade de frases a gerar. */
-const COUNTS = [5, 10, 15, 20]
+const COUNTS = [5, 10, 15, 20] as const
 
-/**
- * Tela de geração de frases.
- * Permite escolher tópico, nível e quantidade; chama a API via Electron IPC.
- *
- * @param {object}   props
- * @param {Function} props.onGenerate - `(phrases: Phrase[]) => void` — chamado após geração bem-sucedida.
- */
-export default function GeneratorScreen({ onGenerate }) {
-  const [topic, setTopic]   = useState('daily')
-  const [level, setLevel]   = useState('beginner')
-  const [count, setCount]   = useState(10)
+type TopicId = (typeof TOPICS)[number]['id']
+type LevelId = (typeof LEVELS)[number]['id']
+
+interface GeneratorScreenProps {
+  onGenerate: (phrases: Phrase[]) => void
+}
+
+export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
+  const [topic, setTopic] = useState<TopicId>('daily')
+  const [level, setLevel] = useState<LevelId>('beginner')
+  const [count, setCount] = useState<10 | 5 | 15 | 20>(10)
   const [loading, setLoading] = useState(false)
-  const [error, setError]   = useState('')
+  const [error, setError] = useState('')
 
   const handleGenerate = async () => {
     const apiKey = storage.getApiKey()
@@ -54,19 +45,27 @@ export default function GeneratorScreen({ onGenerate }) {
     setError('')
     setLoading(true)
 
-    const topicLabel = TOPICS.find((t) => t.id === topic)?.label || topic
+    const topicLabel = TOPICS.find((t) => t.id === topic)?.label ?? topic
 
     try {
-      const result = await window.electronAPI.generatePhrases({ apiKey, topic: topicLabel, level, count })
+      const result = await window.electronAPI.generatePhrases({
+        apiKey,
+        topic: topicLabel,
+        level,
+        count,
+      })
 
       if (!result.success) {
-        setError(result.error || 'Erro ao gerar frases.')
-      } else {
-        const phrases = result.phrases.map((p, i) => ({ id: `${Date.now()}_${i}`, ...p }))
+        setError(result.error ?? 'Erro ao gerar frases.')
+      } else if (result.phrases) {
+        const phrases: Phrase[] = result.phrases.map((p, i) => ({
+          id: `${Date.now()}_${i}`,
+          ...p,
+        }))
         onGenerate(phrases)
       }
     } catch (err) {
-      setError(err.message || 'Erro inesperado.')
+      setError(err instanceof Error ? err.message : 'Erro inesperado.')
     } finally {
       setLoading(false)
     }

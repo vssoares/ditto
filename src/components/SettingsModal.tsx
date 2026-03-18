@@ -2,14 +2,11 @@ import { useState } from 'react'
 import { storage } from '../utils/storage'
 import { Modal, TextInput, Button } from './ui'
 
-/**
- * Modal de configurações do app.
- * Permite ao usuário inserir e salvar a OpenAI API Key localmente.
- *
- * @param {object}   props
- * @param {Function} props.onClose - Chamado ao fechar o modal.
- */
-export default function SettingsModal({ onClose }) {
+interface SettingsModalProps {
+  onClose: () => void
+}
+
+export default function SettingsModal({ onClose }: SettingsModalProps) {
   const [apiKey, setApiKey] = useState(storage.getApiKey())
   const [saved, setSaved] = useState(false)
 

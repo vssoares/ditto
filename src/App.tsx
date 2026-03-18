@@ -5,19 +5,21 @@ import StudyScreen from './components/StudyScreen'
 import LibraryScreen from './components/LibraryScreen'
 import SettingsModal from './components/SettingsModal'
 import { storage } from './utils/storage'
+import type { Phrase } from './utils/types'
 
 const NAV = [
   { id: 'generate', label: 'Gerar', icon: '✦' },
   { id: 'library', label: 'Biblioteca', icon: '◈' },
-]
+] as const
+
+type ScreenId = (typeof NAV)[number]['id'] | 'study'
 
 export default function App() {
-  const [screen, setScreen] = useState('generate')
-  const [studyPhrases, setStudyPhrases] = useState(null)
+  const [screen, setScreen] = useState<ScreenId>('generate')
+  const [studyPhrases, setStudyPhrases] = useState<Phrase[] | null>(null)
   const [showSettings, setShowSettings] = useState(!storage.getApiKey())
 
-  const handleGenerate = (phrases) => {
-    // Save new phrases to library
+  const handleGenerate = (phrases: Phrase[]) => {
     const existing = storage.getPhrases()
     const existingIds = new Set(existing.map((p) => p.id))
     const newPhrases = phrases.filter((p) => !existingIds.has(p.id))
@@ -27,7 +29,7 @@ export default function App() {
     setScreen('study')
   }
 
-  const handleStudyFromLibrary = (phrases) => {
+  const handleStudyFromLibrary = (phrases: Phrase[]) => {
     setStudyPhrases(phrases)
     setScreen('study')
   }

@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :8080)",
+      "Bash(taskkill /PID 18452 /F)",
+      "Bash(cmd /c \"taskkill /PID 18452 /F\")",
+      "Bash(cmd /c \"taskkill /PID 18452 /F 2>&1\")",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }

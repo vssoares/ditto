@@ -1,28 +1,44 @@
 import { useState, useEffect, useCallback } from 'react'
 import { updatePhrase, sortByDue } from '../utils/spaceRepetition'
 import { storage } from '../utils/storage'
+import type { Phrase, Rating } from '../utils/types'
 import { Button, Badge, ProgressBar, StatCard } from './ui'
-/** @typedef {import('../utils/types').Phrase} Phrase */
-/** @typedef {import('../utils/types').Rating} Rating */
 
-/**
- * Tela de estudo com flashcards — exibe frases uma a uma usando repetição espaçada.
- *
- * Atalhos de teclado:
- * - `Space` → vira o card para mostrar a tradução.
- * - `1` → De novo · `2` → Difícil · `3` → Ok · `4` → Fácil.
- *
- * @param {object}   props
- * @param {Phrase[]} props.phrases          - Frases a estudar (ordenadas por vencimento internamente).
- * @param {Function} props.onBack           - Navega de volta à tela de geração.
- * @param {Function} props.onFinish         - Navega para a biblioteca ao concluir a sessão.
- */
-export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish }) {
-  const [phrases, setPhrases] = useState(() => sortByDue(initialPhrases))
-  const [index, setIndex]     = useState(0)
+interface StudyScreenProps {
+  phrases: Phrase[]
+  onBack: () => void
+  onFinish: () => void
+}
+
+interface SessionStats {
+  easy: number
+  ok: number
+  hard: number
+  again: number
+}
+
+const RATING_BUTTONS: { id: Rating; label: string; key: string; hoverClass: string }[] = [
+  { id: 'again', label: 'De novo', key: '1', hoverClass: 'hover:bg-red-900/40 hover:border-red-700 hover:text-red-400' },
+  { id: 'hard', label: 'Difícil', key: '2', hoverClass: 'hover:bg-orange-900/40 hover:border-orange-700 hover:text-orange-400' },
+  { id: 'ok', label: 'Ok', key: '3', hoverClass: 'hover:bg-blue-900/40 hover:border-blue-700 hover:text-blue-400' },
+  { id: 'easy', label: 'Fácil', key: '4', hoverClass: 'hover:bg-green-900/40 hover:border-green-700 hover:text-green-400' },
+]
+
+export default function StudyScreen({
+  phrases: initialPhrases,
+  onBack,
+  onFinish,
+}: StudyScreenProps) {
+  const [phrases, setPhrases] = useState<Phrase[]>(() => sortByDue(initialPhrases))
+  const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
-  const [done, setDone]       = useState(false)
-  const [sessionStats, setSessionStats] = useState({ easy: 0, ok: 0, hard: 0, again: 0 })
+  const [done, setDone] = useState(false)
+  const [sessionStats, setSessionStats] = useState<SessionStats>({
+    easy: 0,
+    ok: 0,
+    hard: 0,
+    again: 0,
+  })
 
   const current = phrases[index]
 
@@ -31,11 +47,10 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
   }, [flipped])
 
   const handleRating = useCallback(
-    (rating) => {
-      if (!flipped) return
+    (rating: Rating) => {
+      if (!flipped || !current) return
 
-      // Atualiza a frase com algoritmo SM-2 e persiste no localStorage
-      const updated   = updatePhrase(current, rating)
+      const updated = updatePhrase(current, rating)
       const newPhrases = phrases.map((p, i) => (i === index ? updated : p))
       storage.setPhrases([...storage.getPhrases().filter((p) => p.id !== current.id), updated])
       storage.updateStats(rating === 'easy' || rating === 'ok' ? 'easy' : 'hard')
@@ -53,10 +68,12 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
     [flipped, current, phrases, index]
   )
 
-  // Atalhos de teclado
   useEffect(() => {
-    const handler = (e) => {
-      if (e.code === 'Space')  { e.preventDefault(); handleFlip() }
+    const handler = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault()
+        handleFlip()
+      }
       if (flipped) {
         if (e.code === 'Digit1') handleRating('again')
         if (e.code === 'Digit2') handleRating('hard')
@@ -77,6 +94,10 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
         onFinish={onFinish}
       />
     )
+  }
+
+  if (!current) {
+    return null
   }
 
   return (
@@ -114,7 +135,7 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
               </div>
 
               <p className="font-display text-3xl text-chalk leading-relaxed italic text-center">
-                "{current.english}"
+                &quot;{current.english}&quot;
               </p>
 
               <p className="font-mono text-xs text-chalk/20 text-center">
@@ -128,7 +149,7 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
 
               <div className="space-y-3 text-center">
                 <p className="font-display text-2xl text-amber-400 italic">
-                  "{current.portuguese}"
+                  &quot;{current.portuguese}&quot;
                 </p>
                 {current.tip && (
                   <p className="font-sans text-sm text-chalk/50 bg-ink-900/60 rounded-xl px-4 py-2">
@@ -142,7 +163,7 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
           </div>
         </div>
 
-        {/* Botões de avaliação — visíveis após virar o card */}
+        {/* Botões de avaliação */}
         <div
           className={`flex gap-3 w-full max-w-xl transition-all duration-300 ${
             flipped ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
@@ -164,30 +185,14 @@ export default function StudyScreen({ phrases: initialPhrases, onBack, onFinish 
   )
 }
 
-/**
- * Configuração dos botões de avaliação do card.
- * @type {{ id: string, label: string, key: string, hoverClass: string }[]}
- */
-const RATING_BUTTONS = [
-  { id: 'again', label: 'De novo', key: '1', hoverClass: 'hover:bg-red-900/40 hover:border-red-700 hover:text-red-400' },
-  { id: 'hard',  label: 'Difícil', key: '2', hoverClass: 'hover:bg-orange-900/40 hover:border-orange-700 hover:text-orange-400' },
-  { id: 'ok',    label: 'Ok',      key: '3', hoverClass: 'hover:bg-blue-900/40 hover:border-blue-700 hover:text-blue-400' },
-  { id: 'easy',  label: 'Fácil',   key: '4', hoverClass: 'hover:bg-green-900/40 hover:border-green-700 hover:text-green-400' },
-]
+interface FinishScreenProps {
+  stats: SessionStats
+  total: number
+  onBack: () => void
+  onFinish: () => void
+}
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Tela de conclusão da sessão de estudo.
- * Exibe score e estatísticas de desempenho com opções de continuar ou revisar.
- *
- * @param {object}   props
- * @param {{ easy: number, ok: number, hard: number, again: number }} props.stats
- * @param {number}   props.total    - Total de frases na sessão.
- * @param {Function} props.onBack   - Volta para a tela de geração.
- * @param {Function} props.onFinish - Vai para a biblioteca.
- */
-function FinishScreen({ stats, total, onBack, onFinish }) {
+function FinishScreen({ stats, total, onBack, onFinish }: FinishScreenProps) {
   const score = Math.round(((stats.easy + stats.ok) / total) * 100)
   const emoji = score >= 80 ? '🎉' : score >= 50 ? '💪' : '📖'
   const title = score >= 80 ? 'Excelente!' : score >= 50 ? 'Bom trabalho!' : 'Continue praticando!'
@@ -203,15 +208,15 @@ function FinishScreen({ stats, total, onBack, onFinish }) {
         </div>
 
         <div className="grid grid-cols-4 gap-2">
-          <StatCard value={stats.easy}  label="Fácil"   color="text-green-400" />
-          <StatCard value={stats.ok}    label="Ok"       color="text-blue-400" />
-          <StatCard value={stats.hard}  label="Difícil"  color="text-orange-400" />
-          <StatCard value={stats.again} label="De novo"  color="text-red-400" />
+          <StatCard value={stats.easy} label="Fácil" color="text-green-400" />
+          <StatCard value={stats.ok} label="Ok" color="text-blue-400" />
+          <StatCard value={stats.hard} label="Difícil" color="text-orange-400" />
+          <StatCard value={stats.again} label="De novo" color="text-red-400" />
         </div>
 
         <div className="flex gap-3">
           <Button variant="secondary" fullWidth onClick={onBack}>Gerar mais</Button>
-          <Button variant="primary"   fullWidth onClick={onFinish}>Revisar frases</Button>
+          <Button variant="primary" fullWidth onClick={onFinish}>Revisar frases</Button>
         </div>
       </div>
     </div>

@@ -1,20 +1,21 @@
 /**
- * @file spaceRepetition.js
+ * @file spaceRepetition.ts
  * @description Implementação do algoritmo SM-2 (SuperMemo 2) para repetição espaçada.
  * Calcula o próximo intervalo de revisão com base no desempenho do usuário.
  *
  * @module utils/spaceRepetition
  */
-/** @typedef {import('./types').Phrase} Phrase */
-/** @typedef {import('./types').Rating} Rating */
+
+import type { Phrase, Rating } from './types'
+
 /**
  * Atualiza os metadados SM-2 de uma frase com base na avaliação do usuário.
  *
- * @param {Phrase} phrase  - Frase a atualizar.
- * @param {Rating} rating  - Avaliação do usuário.
- * @returns {Phrase}       - Nova frase com `interval`, `ease`, `repetitions` e `nextReview` atualizados.
+ * @param phrase - Frase a atualizar.
+ * @param rating - Avaliação do usuário.
+ * @returns Nova frase com `interval`, `ease`, `repetitions` e `nextReview` atualizados.
  */
-export function updatePhrase(phrase, rating) {
+export function updatePhrase(phrase: Phrase, rating: Rating): Phrase {
   const now = Date.now()
   const ease = phrase.ease ?? 2.5
   const interval = phrase.interval ?? 1
@@ -60,10 +61,9 @@ export function updatePhrase(phrase, rating) {
 /**
  * Retorna a quantidade de frases com revisão vencida (ou nunca revisadas).
  *
- * @param {Phrase[]} phrases - Lista de frases.
- * @returns {number}
+ * @param phrases - Lista de frases.
  */
-export function getDueCount(phrases) {
+export function getDueCount(phrases: Phrase[]): number {
   const now = Date.now()
   return phrases.filter((p) => !p.nextReview || p.nextReview <= now).length
 }
@@ -71,10 +71,10 @@ export function getDueCount(phrases) {
 /**
  * Ordena frases priorizando as com revisão vencida, depois por data de vencimento crescente.
  *
- * @param {Phrase[]} phrases - Lista de frases a ordenar.
- * @returns {Phrase[]}       - Nova lista ordenada (não muta o original).
+ * @param phrases - Lista de frases a ordenar.
+ * @returns Nova lista ordenada (não muta o original).
  */
-export function sortByDue(phrases) {
+export function sortByDue(phrases: Phrase[]): Phrase[] {
   const now = Date.now()
   return [...phrases].sort((a, b) => {
     const aOverdue = !a.nextReview || a.nextReview <= now

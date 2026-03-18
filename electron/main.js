@@ -22,7 +22,7 @@ function createWindow() {
   })
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:3742')
+    mainWindow.loadURL('http://localhost:8080')
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }

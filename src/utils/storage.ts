@@ -1,39 +1,41 @@
 /**
- * @file storage.js
+ * @file storage.ts
  * @description Camada de abstração sobre o `localStorage` para persistência local dos dados do app.
  *
  * Todas as chaves do localStorage são prefixadas com `ditto_` para evitar colisões.
  *
  * @module utils/storage
  */
-/** @typedef {import('./types').Phrase}     Phrase */
-/** @typedef {import('./types').StudyStats} StudyStats */
+
+import type { Phrase, StudyStats } from './types'
 
 /** Chaves do localStorage usadas pelo app. */
 const KEYS = {
   API_KEY: 'ditto_api_key',
   PHRASES: 'ditto_phrases',
-  STATS:   'ditto_stats',
-}
+  STATS: 'ditto_stats',
+} as const
+
+const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0 }
 
 export const storage = {
   // ── API Key ────────────────────────────────────────────────────────────────
 
-  /** Retorna a OpenAI API Key salva, ou string vazia se não configurada. @returns {string} */
-  getApiKey: () => localStorage.getItem(KEYS.API_KEY) || '',
+  /** Retorna a OpenAI API Key salva, ou string vazia se não configurada. */
+  getApiKey: (): string => localStorage.getItem(KEYS.API_KEY) || '',
 
-  /** Salva a OpenAI API Key no localStorage. @param {string} key */
-  setApiKey: (key) => localStorage.setItem(KEYS.API_KEY, key),
+  /** Salva a OpenAI API Key no localStorage. */
+  setApiKey: (key: string): void => localStorage.setItem(KEYS.API_KEY, key),
 
   // ── Frases ─────────────────────────────────────────────────────────────────
 
   /**
    * Retorna todas as frases salvas na biblioteca.
-   * @returns {Phrase[]} Lista de frases (vazia se não houver nada salvo ou em caso de erro de parse).
+   * Lista vazia se não houver nada salvo ou em caso de erro de parse.
    */
-  getPhrases: () => {
+  getPhrases: (): Phrase[] => {
     try {
-      return JSON.parse(localStorage.getItem(KEYS.PHRASES)) || []
+      return (JSON.parse(localStorage.getItem(KEYS.PHRASES) ?? 'null') as Phrase[] | null) ?? []
     } catch {
       return []
     }
@@ -41,38 +43,39 @@ export const storage = {
 
   /**
    * Sobrescreve a lista completa de frases no localStorage.
-   * @param {Phrase[]} phrases
    */
-  setPhrases: (phrases) => localStorage.setItem(KEYS.PHRASES, JSON.stringify(phrases)),
+  setPhrases: (phrases: Phrase[]): void =>
+    localStorage.setItem(KEYS.PHRASES, JSON.stringify(phrases)),
 
   // ── Estatísticas ───────────────────────────────────────────────────────────
 
   /**
    * Retorna as estatísticas globais de estudo.
-   * @returns {StudyStats}
    */
-  getStats: () => {
+  getStats: (): StudyStats => {
     try {
-      return JSON.parse(localStorage.getItem(KEYS.STATS)) || { reviewed: 0, easy: 0, hard: 0 }
+      return (
+        (JSON.parse(localStorage.getItem(KEYS.STATS) ?? 'null') as StudyStats | null) ??
+        defaultStats
+      )
     } catch {
-      return { reviewed: 0, easy: 0, hard: 0 }
+      return defaultStats
     }
   },
 
   /**
    * Sobrescreve as estatísticas globais.
-   * @param {StudyStats} stats
    */
-  setStats: (stats) => localStorage.setItem(KEYS.STATS, JSON.stringify(stats)),
+  setStats: (stats: StudyStats): void => localStorage.setItem(KEYS.STATS, JSON.stringify(stats)),
 
   /**
    * Incrementa os contadores de estatísticas após uma avaliação.
    * Sempre incrementa `reviewed`; incrementa `easy` ou `hard` conforme o tipo.
    *
-   * @param {'easy' | 'hard'} type - Tipo de avaliação: `'easy'` para ok/easy, `'hard'` para hard/again.
-   * @returns {StudyStats} Estatísticas atualizadas.
+   * @param type - Tipo de avaliação: `'easy'` para ok/easy, `'hard'` para hard/again.
+   * @returns Estatísticas atualizadas.
    */
-  updateStats: (type) => {
+  updateStats: (type: 'easy' | 'hard'): StudyStats => {
     const stats = storage.getStats()
     stats.reviewed = (stats.reviewed || 0) + 1
     if (type === 'easy') stats.easy = (stats.easy || 0) + 1
