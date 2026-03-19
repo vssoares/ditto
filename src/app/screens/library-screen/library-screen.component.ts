@@ -34,7 +34,6 @@ function formatNextReview(ts: number | undefined, now: number): string {
     EmptyStateComponent,
     SpinnerComponent,
     ErrorBannerComponent,
-    RouterOutlet,
   ],
   templateUrl: './library-screen.component.html',
 })

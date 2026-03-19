@@ -12,7 +12,7 @@
       </p>
     </div>
 
-    <div class="space-y-4">
+    <div class="flex flex-col gap-4">
       <ui-text-input
         label="Email"
         type="email"
@@ -48,7 +48,7 @@
         <button
           type="button"
           (click)="router.navigate(['/login'])"
-          class="text-amber-400/80 hover:text-amber-300 transition-colors"
+          class="text-amber-400/80 hover:text-amber-300 transition-colors cursor-pointer"
           [disabled]="loading()">
           Entrar
         </button>
@@ -56,3 +56,4 @@
     </div>
   </div>
 </div>
+

@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { StorageService } from '../../services/storage.service';
+import { TooltipComponent } from '../../core/components/tooltip/tooltip.component';
 
 const NAV = [
   { id: 'generate', label: 'Gerar', icon: '✦', path: '/app/generate' },
@@ -10,11 +12,12 @@ const NAV = [
 @Component({
   selector: 'app-layout',
   host: { class: 'flex flex-1 min-h-0' },
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, TooltipComponent],
   templateUrl: './app-layout.component.html',
 })
 export class AppLayoutComponent {
   private readonly router = inject(Router);
+  private readonly storage = inject(StorageService);
 
   readonly nav = NAV;
   readonly url = signal<string>(this.router.url);
@@ -32,5 +35,10 @@ export class AppLayoutComponent {
 
   isActive(path: string): boolean {
     return this.url().includes(path);
+  }
+
+  handleLogout(): void {
+    this.storage.logout();
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

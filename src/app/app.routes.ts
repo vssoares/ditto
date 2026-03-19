@@ -1,5 +1,5 @@
 import type { Routes } from '@angular/router';
-import { requireAuthGuard, authRedirectGuard } from './guards/auth.guard';
+import { requireAuthGuard, authRedirectGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -11,13 +11,13 @@ export const routes: Routes = [
         path: 'login',
         canActivate: [authRedirectGuard],
         loadComponent: () =>
-          import('./screens/login-screen/login-screen.component').then((m) => m.LoginScreenComponent),
+          import('./core/auth/login-screen/login-screen.component').then((m) => m.LoginScreenComponent),
       },
       {
         path: 'register',
         canActivate: [authRedirectGuard],
         loadComponent: () =>
-          import('./screens/register-screen/register-screen.component').then((m) => m.RegisterScreenComponent),
+          import('./core/auth/register-screen/register-screen.component').then((m) => m.RegisterScreenComponent),
       },
       {
         path: 'app',

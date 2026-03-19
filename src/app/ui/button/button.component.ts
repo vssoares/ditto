@@ -32,7 +32,7 @@ export class ButtonComponent {
 
   classes(): string {
     return [
-      'font-sans transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed',
+      'font-sans transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed cursor-pointer',
       VARIANTS[this.variant()] ?? VARIANTS['primary'],
       SIZES[this.size()] ?? SIZES['md'],
       this.fullWidth() ? 'w-full' : '',

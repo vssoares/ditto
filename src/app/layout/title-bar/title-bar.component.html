@@ -10,20 +10,26 @@
   </div>
 
   <div class="no-drag flex items-center gap-1">
-    <button
-      (click)="electron.minimize()"
-      class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
-      ─
-    </button>
-    <button
-      (click)="electron.maximize()"
-      class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
-      □
-    </button>
-    <button
-      (click)="electron.close()"
-      class="w-7 h-7 flex items-center justify-center rounded hover:bg-red-900/50 text-chalk/30 hover:text-red-400 transition-colors text-sm">
-      ✕
-    </button>
+    <app-tooltip text="Minimizar" position="bottom">
+      <button
+        (click)="electron.minimize()"
+        class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
+        ─
+      </button>
+    </app-tooltip>
+    <app-tooltip text="Maximizar" position="bottom">
+      <button
+        (click)="electron.maximize()"
+        class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
+        □
+      </button>
+    </app-tooltip>
+    <app-tooltip text="Fechar" position="bottom">
+      <button
+        (click)="electron.close()"
+        class="w-7 h-7 flex items-center justify-center rounded hover:bg-red-900/50 text-chalk/30 hover:text-red-400 transition-colors text-sm">
+        ✕
+      </button>
+    </app-tooltip>
   </div>
 </div>

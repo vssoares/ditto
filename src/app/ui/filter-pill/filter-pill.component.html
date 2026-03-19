@@ -2,7 +2,7 @@
   @for (opt of options(); track opt.id) {
     <button
       (click)="changed.emit(opt.id)"
-      [class]="'px-3 py-1.5 rounded-lg font-mono text-xs transition-all duration-150 border ' +
+      [class]="'cursor-pointer px-3 py-1.5 rounded-lg font-mono text-xs transition-all duration-150 border ' +
         (value() === opt.id
           ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
           : 'text-chalk/30 hover:text-chalk/60 border-transparent')">
