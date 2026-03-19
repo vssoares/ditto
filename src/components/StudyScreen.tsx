@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { updatePhrase, sortByDue } from '../utils/spaceRepetition'
+import { sortByDue } from '../utils/spaceRepetition'
 import { storage } from '../utils/storage'
 import type { Phrase, Rating } from '../utils/types'
-import { Button, Badge, ProgressBar, StatCard } from './ui'
+import { reviewPhrase } from '../utils/phrasesApi'
+import { Button, Badge, ProgressBar, StatCard, ErrorBanner } from './ui'
 
 interface StudyScreenProps {
   phrases: Phrase[]
@@ -39,6 +40,8 @@ export default function StudyScreen({
     hard: 0,
     again: 0,
   })
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const current = phrases[index]
 
@@ -47,25 +50,35 @@ export default function StudyScreen({
   }, [flipped])
 
   const handleRating = useCallback(
-    (rating: Rating) => {
+    async (rating: Rating) => {
       if (!flipped || !current) return
+      if (submitting) return
 
-      const updated = updatePhrase(current, rating)
-      const newPhrases = phrases.map((p, i) => (i === index ? updated : p))
-      storage.setPhrases([...storage.getPhrases().filter((p) => p.id !== current.id), updated])
-      storage.updateStats(rating === 'easy' || rating === 'ok' ? 'easy' : 'hard')
+      const token = storage.getAccessToken()
+      if (!token) {
+        setError('Não autenticado.')
+        return
+      }
 
-      setPhrases(newPhrases)
-      setSessionStats((s) => ({ ...s, [rating]: s[rating] + 1 }))
-      setFlipped(false)
+      setSubmitting(true)
+      setError('')
+      try {
+        await reviewPhrase({ token, phraseId: current.id, rating })
+        setSessionStats((s) => ({ ...s, [rating]: s[rating] + 1 }))
+        setFlipped(false)
 
-      if (index + 1 >= phrases.length) {
-        setDone(true)
-      } else {
-        setIndex((i) => i + 1)
+        if (index + 1 >= phrases.length) {
+          setDone(true)
+        } else {
+          setIndex((i) => i + 1)
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado.')
+      } finally {
+        setSubmitting(false)
       }
     },
-    [flipped, current, phrases, index]
+    [flipped, current, phrases.length, index, submitting]
   )
 
   useEffect(() => {
@@ -75,6 +88,7 @@ export default function StudyScreen({
         handleFlip()
       }
       if (flipped) {
+        if (submitting) return
         if (e.code === 'Digit1') handleRating('again')
         if (e.code === 'Digit2') handleRating('hard')
         if (e.code === 'Digit3') handleRating('ok')
@@ -164,6 +178,7 @@ export default function StudyScreen({
         </div>
 
         {/* Botões de avaliação */}
+        {error ? <ErrorBanner message={error} /> : null}
         <div
           className={`flex gap-3 w-full max-w-xl transition-all duration-300 ${
             flipped ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
@@ -173,6 +188,7 @@ export default function StudyScreen({
             <button
               key={btn.id}
               onClick={() => handleRating(btn.id)}
+              disabled={submitting}
               className={`flex-1 py-3 px-2 rounded-xl border border-ink-600 bg-ink-800 transition-all duration-150 ${btn.hoverClass} text-chalk/50 group`}
             >
               <div className="font-sans font-medium text-sm group-hover:text-inherit">{btn.label}</div>

@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { storage } from '../utils/storage'
 import type { Phrase } from '../utils/types'
-import { Button, Badge, Card, FilterPill, EmptyState } from './ui'
+import { getReviewedPhrases, getUnreviewedPhrases } from '../utils/phrasesApi'
+import { Button, Badge, Card, FilterPill, EmptyState, Spinner, ErrorBanner } from './ui'
 
 function formatNextReview(ts: number | undefined, now: number): string {
   if (!ts) return 'novo'
@@ -18,9 +19,39 @@ interface LibraryScreenProps {
 }
 
 export default function LibraryScreen({ onStudy }: LibraryScreenProps) {
-  const [phrases] = useState<Phrase[]>(() => storage.getPhrases())
+  const [phrases, setPhrases] = useState<Phrase[]>([])
   const [filter, setFilter] = useState<'all' | 'due' | 'learned'>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const loadPhrases = useCallback(async () => {
+    const token = storage.getAccessToken()
+    if (!token) {
+      setError('Não autenticado.')
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    try {
+      const [unreviewed, reviewed] = await Promise.all([
+        getUnreviewedPhrases(token),
+        getReviewedPhrases(token),
+      ])
+      setPhrases([...unreviewed, ...reviewed])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado.')
+      setPhrases([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadPhrases()
+  }, [loadPhrases])
 
   const now = Date.now()
 
@@ -38,13 +69,23 @@ export default function LibraryScreen({ onStudy }: LibraryScreenProps) {
     return true
   })
 
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center animate-fade-up">
+        <div className="text-center space-y-3">
+          <Spinner size="lg" className="text-chalk/35" />
+          <p className="font-mono text-xs text-chalk/30">Carregando biblioteca...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (phrases.length === 0) {
     return (
-      <EmptyState
-        icon="📚"
-        title="Biblioteca vazia"
-        description="Gere frases para começar a estudar"
-      />
+      <>
+        {error ? <ErrorBanner message={error} /> : null}
+        <EmptyState icon="📚" title="Biblioteca vazia" description="Gere frases para começar a estudar" />
+      </>
     )
   }
 

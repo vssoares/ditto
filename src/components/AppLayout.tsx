@@ -4,7 +4,6 @@ import GeneratorScreen from './GeneratorScreen'
 import LibraryScreen from './LibraryScreen'
 import StudyScreen from './StudyScreen'
 import type { Phrase } from '../utils/types'
-import { storage } from '../utils/storage'
 
 const NAV = [
   { id: 'generate', label: 'Gerar', icon: '✦', path: '/app/generate' },
@@ -25,11 +24,6 @@ export default function AppLayout() {
   }, [location.pathname])
 
   const handleGenerate = (phrases: Phrase[]) => {
-    const existing = storage.getPhrases()
-    const existingIds = new Set(existing.map((p) => p.id))
-    const newPhrases = phrases.filter((p) => !existingIds.has(p.id))
-    storage.setPhrases([...existing, ...newPhrases])
-
     setStudyPhrases(phrases)
     navigate('/app/study')
   }

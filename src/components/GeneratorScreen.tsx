@@ -57,11 +57,7 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
         count,
         token,
       })
-      const phrases: Phrase[] = result.phrases.map((p, i) => ({
-        id: `${Date.now()}_${i}`,
-        ...p,
-      }))
-      onGenerate(phrases)
+      onGenerate(result.phrases)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado.')
     } finally {
