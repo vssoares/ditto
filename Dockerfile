@@ -14,6 +14,7 @@ FROM nginx:1.27-alpine AS runtime
 
 # SPA Angular gerada pelo Angular builder
 COPY --from=build /app/dist/ditto/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 3399
 
