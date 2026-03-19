@@ -14,6 +14,8 @@ const KEYS = {
   PHRASES: 'ditto_phrases',
   STATS: 'ditto_stats',
   API_KEY: 'ditto_api_key',
+  AUTH_ACCESS_TOKEN: 'ditto_access_token',
+  AUTH_USER: 'ditto_auth_user',
 } as const
 
 const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0 }
@@ -81,4 +83,34 @@ export const storage = {
   getApiKey: (): string =>
     typeof localStorage !== 'undefined' ? localStorage.getItem(KEYS.API_KEY) ?? '' : '',
   setApiKey: (key: string): void => localStorage.setItem(KEYS.API_KEY, key),
+
+  // ── Auth (local) ───────────────────────────────────────────────────────────
+
+  getAccessToken: (): string => localStorage.getItem(KEYS.AUTH_ACCESS_TOKEN) ?? '',
+  isAuthenticated: (): boolean => Boolean(storage.getAccessToken()),
+
+  getAuthUser: (): { id: string; email: string } | null => {
+    try {
+      return (
+        (JSON.parse(localStorage.getItem(KEYS.AUTH_USER) ?? 'null') as
+          | { id: string; email: string }
+          | null) ?? null
+      )
+    } catch {
+      return null
+    }
+  },
+
+  logout: (): void => {
+    localStorage.removeItem(KEYS.AUTH_ACCESS_TOKEN)
+    localStorage.removeItem(KEYS.AUTH_USER)
+  },
+
+  setSession: (token: string, user: { id: string; email: string }): void => {
+    localStorage.setItem(KEYS.AUTH_ACCESS_TOKEN, token)
+    localStorage.setItem(KEYS.AUTH_USER, JSON.stringify(user))
+  },
+
+  // compat: tela antiga podia prefiller email
+  getAuthEmail: (): string => storage.getAuthUser()?.email ?? '',
 }
