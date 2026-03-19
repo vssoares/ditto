@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type { Phrase, StudyStats } from '../utils/types';
+import type { Phrase, StudyStats } from '../ui/utils/types';
 
 const KEYS = {
   PHRASES: 'ditto_phrases',

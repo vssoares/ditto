@@ -1,4 +1,5 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ButtonComponent } from '../../ui/button/button.component';
 import { LabelComponent } from '../../ui/label/label.component';
 import { SelectOptionComponent } from '../../ui/select-option/select-option.component';
@@ -6,7 +7,8 @@ import { TextInputComponent } from '../../ui/text-input/text-input.component';
 import { ErrorBannerComponent } from '../../ui/error-banner/error-banner.component';
 import { PhrasesApiService } from '../../services/phrases-api.service';
 import { StorageService } from '../../services/storage.service';
-import type { Phrase } from '../../utils/types';
+import { StudySessionService } from '../../services/study-session.service';
+import type { Phrase } from '../../ui/utils/types';
 
 const TOPICS = [
   { id: 'daily', label: 'Cotidiano', icon: '☀' },
@@ -42,7 +44,8 @@ const COUNTS = [5, 10, 15, 20] as const;
 export class GeneratorScreenComponent {
   private readonly phrasesApi = inject(PhrasesApiService);
   private readonly storage = inject(StorageService);
-  readonly generated = output<Phrase[]>();
+  private readonly router = inject(Router);
+  private readonly session = inject(StudySessionService);
 
   readonly topics = TOPICS;
   readonly levels = LEVELS;
@@ -82,7 +85,8 @@ export class GeneratorScreenComponent {
         count: this.count(),
         token,
       });
-      this.generated.emit(result.phrases);
+      this.session.setPhrases(result.phrases);
+      this.router.navigate(['/app/study/unreviewed']);
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : 'Erro inesperado.');
     } finally {

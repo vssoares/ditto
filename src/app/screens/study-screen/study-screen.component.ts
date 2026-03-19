@@ -7,8 +7,8 @@ import { StatCardComponent } from '../../ui/stat-card/stat-card.component';
 import { ErrorBannerComponent } from '../../ui/error-banner/error-banner.component';
 import { PhrasesApiService } from '../../services/phrases-api.service';
 import { StorageService } from '../../services/storage.service';
-import { sortByDue } from '../../utils/space-repetition';
-import type { Phrase, Rating } from '../../utils/types';
+import { sortByDue } from '../../ui/utils/space-repetition';
+import type { Phrase, Rating } from '../../ui/utils/types';
 
 interface SessionStats {
   easy: number;
@@ -116,10 +116,12 @@ export class StudyScreenComponent {
 
     this.submitting.set(true);
     this.error.set('');
+
+    debugger
     try {
       await this.phrasesApi.reviewPhrase({
         token,
-        phraseId: this.current()!.id,
+        phraseId: this.current()?.phraseId ?? '',
         rating,
       });
       this.sessionStats.update((s) => ({ ...s, [rating]: s[rating] + 1 }));

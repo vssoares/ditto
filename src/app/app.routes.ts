@@ -28,9 +28,29 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./layout/app-layout/app-layout.component').then((m) => m.AppLayoutComponent),
             children: [
-              { path: 'generate', children: [] },
-              { path: 'library', children: [] },
-              { path: 'study', children: [] },
+              {
+                path: 'generate',
+                loadComponent: () =>
+                  import('./screens/generator-screen/generator-screen.component').then(
+                    (m) => m.GeneratorScreenComponent,
+                  ),
+              },
+              {
+                path: 'library',
+                loadComponent: () =>
+                  import('./screens/library-screen/library-screen.component').then((m) => m.LibraryScreenComponent),
+              },
+              {
+                path: 'study/unreviewed',
+                loadComponent: () =>
+                  import('./screens/study-unreviewed/study-unreviewed.component').then((m) => m.StudyUnreviewedComponent),
+              },
+              {
+                path: 'study/reviewed',
+                loadComponent: () =>
+                  import('./screens/study-reviewed/study-reviewed.component').then((m) => m.StudyReviewedComponent),
+              },
+              { path: 'study', redirectTo: 'study/unreviewed', pathMatch: 'full' },
               { path: '', redirectTo: 'generate', pathMatch: 'full' },
             ],
           },

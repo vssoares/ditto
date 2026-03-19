@@ -1,15 +1,15 @@
-@if (screen() !== 'study') {
+@if (!isStudyRoute()) {
   <aside class="w-16 flex flex-col items-center py-4 gap-2 border-r border-ink-700 bg-ink-950 shrink-0">
     @for (item of nav; track item.id) {
       <button
-        (click)="navigateTo(item.path, item.id)"
+        (click)="navigateTo(item.path)"
         [title]="item.label"
         [class]="'w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-150 group relative ' +
-          (screen() === item.id
+          (isActive(item.path)
             ? 'bg-amber-500/15 text-amber-400'
             : 'text-chalk/25 hover:text-chalk/60 hover:bg-ink-800')">
         <span class="text-base">{{ item.icon }}</span>
-        @if (screen() === item.id) {
+        @if (isActive(item.path)) {
           <span class="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-amber-500 rounded-l"></span>
         }
       </button>
@@ -20,20 +20,5 @@
 }
 
 <main class="flex-1 flex flex-col min-h-0 min-w-0">
-  @switch (screen()) {
-    @case ('generate') {
-      <app-generator-screen (generated)="handleGenerate($event)" />
-    }
-    @case ('library') {
-      <app-library-screen (study)="handleStudyFromLibrary($event)" />
-    }
-    @case ('study') {
-      @if (studyPhrases()) {
-        <app-study-screen
-          [initialPhrases]="studyPhrases()!"
-          (back)="handleStudyBack()"
-          (finish)="handleStudyFinish()" />
-      }
-    }
-  }
+  <router-outlet />
 </main>

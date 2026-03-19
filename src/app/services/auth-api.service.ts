@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import { environment } from '../utils/environment';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../ui/utils/environment';
 
 const authUserSchema = z.object({
   id: z.string().uuid(),
@@ -23,33 +25,31 @@ export type AuthMeResponse = z.infer<typeof authMeResponseSchema>;
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
+  constructor(private readonly http: HttpClient) {}
+
   private get backendUrl(): string {
     return environment.backendUrl;
   }
 
-  private async requestJson(input: string, init: RequestInit): Promise<unknown> {
-    const res = await fetch(input, init);
-    const text = await res.text();
-
-    let data: unknown = null;
+  private async requestJson(url: string, init: { method: string; body?: unknown; headers?: Record<string, string> }): Promise<unknown> {
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-
-    if (!res.ok) {
+      return await firstValueFrom(
+        this.http.request<unknown>(init.method, url, {
+          body: init.body,
+          headers: init.headers,
+        }),
+      );
+    } catch (err) {
+      const e = err as HttpErrorResponse;
+      const payload = e.error as unknown;
       const msg =
-        typeof data === 'object' && data && 'message' in data
-          ? String((data as { message?: unknown }).message ?? '')
-          : typeof data === 'string'
-            ? data
-            : `Erro ${res.status}`;
-
-      throw new Error(msg || `Erro ${res.status}`);
+        typeof payload === 'object' && payload && 'message' in payload
+          ? String((payload as { message?: unknown }).message ?? '')
+          : typeof payload === 'string'
+            ? payload
+            : e.message;
+      throw new Error(msg || `Erro ${e.status ?? ''}`);
     }
-
-    return data;
   }
 
   async register(email: string, password: string): Promise<AuthTokenResponse> {
@@ -57,7 +57,7 @@ export class AuthApiService {
     const data = await this.requestJson(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: { email, password },
     });
     return authTokenResponseSchema.parse(data);
   }
@@ -67,7 +67,7 @@ export class AuthApiService {
     const data = await this.requestJson(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: { email, password },
     });
     return authTokenResponseSchema.parse(data);
   }

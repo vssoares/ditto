@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import type { Phrase, Rating } from '../utils/types';
-import { environment } from '../utils/environment';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import type { Phrase, Rating } from '../ui/utils/types';
+import { environment } from '../ui/utils/environment';
 
 const ratingSchema = z.enum(['again', 'hard', 'ok', 'easy']);
 
@@ -22,6 +24,7 @@ const phraseSchema = z.object({
   repetitions: maybeNumber,
   nextReview: maybeNumber,
   lastReview: maybeNumber,
+  phraseId: z.string().optional(),
   rating: ratingSchema
     .nullable()
     .transform((v) => (v === null ? undefined : v))
@@ -32,35 +35,43 @@ const phrasesResponseSchema = z.object({
   phrases: z.array(phraseSchema),
 });
 
+const phrasesArraySchema = z.array(phraseSchema);
+
+const normalizePhrasesResponse = (data: unknown): Phrase[] => {
+  // Alguns endpoints do back retornam `{ phrases: [...] }`,
+  // outros retornam diretamente `[...]`.
+  if (Array.isArray(data)) return phrasesArraySchema.parse(data);
+  const parsed = phrasesResponseSchema.parse(data);
+  return parsed.phrases;
+};
+
 @Injectable({ providedIn: 'root' })
 export class PhrasesApiService {
+  constructor(private readonly http: HttpClient) {}
+
   private get backendUrl(): string {
     return environment.backendUrl;
   }
 
-  private async requestJson(input: string, init: RequestInit): Promise<unknown> {
-    const res = await fetch(input, init);
-    const text = await res.text();
-
-    let data: unknown = null;
+  private async requestJson(url: string, init: { method: string; body?: unknown; headers?: Record<string, string> }): Promise<unknown> {
     try {
-      data = text ? JSON.parse(text) : null;
-    } catch {
-      data = text;
-    }
-
-    if (!res.ok) {
+      return await firstValueFrom(
+        this.http.request<unknown>(init.method, url, {
+          body: init.body,
+          headers: init.headers,
+        }),
+      );
+    } catch (err) {
+      const e = err as HttpErrorResponse;
+      const payload = e.error as unknown;
       const msg =
-        typeof data === 'object' && data && 'message' in data
-          ? String((data as { message?: unknown }).message ?? '')
-          : typeof data === 'string'
-            ? data
-            : `Erro ${res.status}`;
-
-      throw new Error(msg || `Erro ${res.status}`);
+        typeof payload === 'object' && payload && 'message' in payload
+          ? String((payload as { message?: unknown }).message ?? '')
+          : typeof payload === 'string'
+            ? payload
+            : e.message;
+      throw new Error(msg || `Erro ${e.status ?? ''}`);
     }
-
-    return data;
   }
 
   async generatePhrases(params: {
@@ -72,18 +83,15 @@ export class PhrasesApiService {
     const url = `${this.backendUrl}/phrases`;
     const data = await this.requestJson(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${params.token}`,
-      },
-      body: JSON.stringify({
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${params.token}` },
+      body: {
         topic: params.topic,
         level: params.level,
         count: params.count,
-      }),
+      },
     });
-    const parsed = phrasesResponseSchema.parse(data);
-    return { phrases: parsed.phrases };
+    const phrases = normalizePhrasesResponse(data);
+    return { phrases };
   }
 
   async getUnreviewedPhrases(token: string): Promise<Phrase[]> {
@@ -94,8 +102,7 @@ export class PhrasesApiService {
         Authorization: `Bearer ${token}`,
       },
     });
-    const parsed = phrasesResponseSchema.parse(data);
-    return parsed.phrases;
+    return normalizePhrasesResponse(data);
   }
 
   async getReviewedPhrases(token: string): Promise<Phrase[]> {
@@ -106,8 +113,7 @@ export class PhrasesApiService {
         Authorization: `Bearer ${token}`,
       },
     });
-    const parsed = phrasesResponseSchema.parse(data);
-    return parsed.phrases;
+    return normalizePhrasesResponse(data);
   }
 
   async reviewPhrase(params: {
@@ -119,13 +125,10 @@ export class PhrasesApiService {
 
     await this.requestJson(url, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${params.token}`,
-      },
-      body: JSON.stringify({
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${params.token}` },
+      body: {
         rating: params.rating,
-      }),
+      },
     });
   }
 }

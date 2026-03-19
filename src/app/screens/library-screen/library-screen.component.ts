@@ -1,4 +1,6 @@
-import { Component, inject, output, signal, computed } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter as rxFilter } from 'rxjs/operators';
 import { ButtonComponent } from '../../ui/button/button.component';
 import { BadgeComponent } from '../../ui/badge/badge.component';
 import { CardComponent } from '../../ui/card/card.component';
@@ -8,7 +10,8 @@ import { SpinnerComponent } from '../../ui/spinner/spinner.component';
 import { ErrorBannerComponent } from '../../ui/error-banner/error-banner.component';
 import { PhrasesApiService } from '../../services/phrases-api.service';
 import { StorageService } from '../../services/storage.service';
-import type { Phrase } from '../../utils/types';
+import { StudySessionService } from '../../services/study-session.service';
+import type { Phrase } from '../../ui/utils/types';
 
 function formatNextReview(ts: number | undefined, now: number): string {
   if (!ts) return 'novo';
@@ -31,43 +34,68 @@ function formatNextReview(ts: number | undefined, now: number): string {
     EmptyStateComponent,
     SpinnerComponent,
     ErrorBannerComponent,
+    RouterOutlet,
   ],
   templateUrl: './library-screen.component.html',
 })
 export class LibraryScreenComponent {
   private readonly phrasesApi = inject(PhrasesApiService);
   private readonly storage = inject(StorageService);
-  readonly study = output<Phrase[]>();
+  private readonly router = inject(Router);
+  private readonly session = inject(StudySessionService);
 
   readonly phrases = signal<Phrase[]>([]);
-  readonly filter = signal<string>('all');
+  readonly unreviewedPhrases = signal<Phrase[]>([]);
+  readonly reviewedPhrases = signal<Phrase[]>([]);
+  readonly filter = signal<'unreviewed' | 'reviewed'>('unreviewed');
   readonly expandedId = signal<string | null>(null);
   readonly loading = signal(true);
   readonly error = signal('');
 
   private readonly now = Date.now();
 
-  readonly dueCount = computed(() =>
-    this.phrases().filter((p) => !p.nextReview || p.nextReview <= this.now).length
-  );
+  private readonly isUnreviewed = (p: Phrase): boolean =>
+    p.lastReview === undefined;
+
+  private readonly isDueReviewed = (p: Phrase): boolean =>
+    p.lastReview !== undefined && p.nextReview !== undefined && p.nextReview <= this.now;
+
+  readonly unreviewedCount = computed(() => this.unreviewedPhrases().length);
+  readonly reviewedCount = computed(() => this.reviewedPhrases().length);
+  readonly dueReviewedCount = computed(() => this.reviewedPhrases().filter(this.isDueReviewed).length);
 
   readonly filterOptions = computed<FilterOption[]>(() => [
-    { id: 'all', label: `Todas (${this.phrases().length})` },
-    { id: 'due', label: `Revisar (${this.dueCount()})` },
-    { id: 'learned', label: 'Aprendidas' },
+    { id: 'unreviewed', label: `Não revisadas (${this.unreviewedCount()})` },
+    { id: 'reviewed', label: `Revisadas (${this.reviewedCount()})` },
   ]);
 
   readonly filtered = computed(() => {
     const f = this.filter();
-    return this.phrases().filter((p) => {
-      if (f === 'due') return !p.nextReview || p.nextReview <= this.now;
-      if (f === 'learned') return !!(p.nextReview && p.nextReview > this.now && (p.repetitions ?? 0) >= 3);
-      return true;
-    });
+    if (f === 'unreviewed') return this.unreviewedPhrases();
+    return this.reviewedPhrases();
   });
 
   constructor() {
+    this.syncFilterFromUrl(this.router.url);
+    this.router.events
+      .pipe(rxFilter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.syncFilterFromUrl(e.urlAfterRedirects));
     this.loadPhrases();
+  }
+
+  private syncFilterFromUrl(url: string): void {
+    if (url.includes('/app/library/reviewed')) this.filter.set('reviewed');
+    else if (url.includes('/app/library/unreviewed')) this.filter.set('unreviewed');
+  }
+
+  onTabChanged(tab: string): void {
+    if (tab === 'unreviewed') {
+      this.filter.set('unreviewed');
+    }
+
+    if (tab === 'reviewed') {
+      this.filter.set('reviewed');
+    }
   }
 
   async loadPhrases(): Promise<void> {
@@ -85,10 +113,14 @@ export class LibraryScreenComponent {
         this.phrasesApi.getUnreviewedPhrases(token),
         this.phrasesApi.getReviewedPhrases(token),
       ]);
+      this.unreviewedPhrases.set(unreviewed);
+      this.reviewedPhrases.set(reviewed);
       this.phrases.set([...unreviewed, ...reviewed]);
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : 'Erro inesperado.');
       this.phrases.set([]);
+      this.unreviewedPhrases.set([]);
+      this.reviewedPhrases.set([]);
     } finally {
       this.loading.set(false);
     }
@@ -98,8 +130,14 @@ export class LibraryScreenComponent {
     this.expandedId.set(this.expandedId() === id ? null : id);
   }
 
-  studyDue(): void {
-    this.study.emit(this.phrases().filter((p) => !p.nextReview || p.nextReview <= this.now));
+  studyUnreviewedNow(): void {
+    this.session.setPhrases(this.unreviewedPhrases());
+    this.router.navigate(['/app/study/unreviewed']);
+  }
+
+  studyReviewedNow(): void {
+    this.session.setPhrases(this.reviewedPhrases().filter(this.isDueReviewed));
+    this.router.navigate(['/app/study/reviewed']);
   }
 
   formatReview(ts: number | undefined): string {
