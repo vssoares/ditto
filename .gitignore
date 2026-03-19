@@ -46,3 +46,7 @@ coverage/
 
 # Electron packager
 release/
+
+
+# Angular
+.angular/

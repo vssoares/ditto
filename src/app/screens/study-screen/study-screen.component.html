@@ -1,0 +1,97 @@
+@if (done()) {
+  <div class="flex-1 flex flex-col items-center justify-center p-6 animate-fade-up">
+    <div class="text-center max-w-sm space-y-6">
+      <div class="text-6xl font-display">{{ finishEmoji() }}</div>
+
+      <div>
+        <h2 class="font-display text-4xl text-chalk mb-1">{{ finishTitle() }}</h2>
+        <p class="text-chalk/40 font-mono text-xs">Sessão concluída · {{ phrases().length }} frases</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2">
+        <ui-stat-card [value]="sessionStats().easy" label="Fácil" color="text-green-400" />
+        <ui-stat-card [value]="sessionStats().ok" label="Ok" color="text-blue-400" />
+        <ui-stat-card [value]="sessionStats().hard" label="Difícil" color="text-orange-400" />
+        <ui-stat-card [value]="sessionStats().again" label="De novo" color="text-red-400" />
+      </div>
+
+      <div class="flex gap-3">
+        <ui-button variant="secondary" [fullWidth]="true" (clicked)="back.emit()">Gerar mais</ui-button>
+        <ui-button variant="primary" [fullWidth]="true" (clicked)="finish.emit()">Revisar frases</ui-button>
+      </div>
+    </div>
+  </div>
+} @else if (current()) {
+  <div class="flex-1 flex flex-col p-6 animate-fade-in">
+    <div class="flex items-center gap-4 mb-6">
+      <ui-button variant="ghost" size="sm" (clicked)="back.emit()">← voltar</ui-button>
+      <ui-progress-bar [value]="index()" [max]="phrases().length" className="flex-1" />
+      <span class="font-mono text-xs text-chalk/30">
+        {{ index() + 1 }}/{{ phrases().length }}
+      </span>
+    </div>
+
+    <div class="flex-1 flex flex-col items-center justify-center gap-6">
+      <div
+        class="perspective w-full max-w-xl cursor-pointer"
+        style="height: 260px"
+        (click)="handleFlip()">
+        <div [class]="'card-inner w-full h-full ' + (flipped() ? 'flipped' : '')">
+          <div class="card-front w-full h-full bg-ink-800 border border-ink-600 rounded-2xl p-8 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <span class="font-mono text-xs text-amber-500/40 uppercase tracking-widest">Inglês</span>
+              <div class="flex gap-1">
+                @for (kw of current()!.keywords ?? []; track kw) {
+                  <ui-badge>{{ kw }}</ui-badge>
+                }
+              </div>
+            </div>
+
+            <p class="font-display text-3xl text-chalk leading-relaxed italic text-center">
+              "{{ current()!.english }}"
+            </p>
+
+            <p class="font-mono text-xs text-chalk/20 text-center">
+              clique para ver a tradução · espaço
+            </p>
+          </div>
+
+          <div class="card-back bg-ink-800 border border-amber-500/30 rounded-2xl p-8 flex flex-col justify-between">
+            <span class="font-mono text-xs text-amber-500/60 uppercase tracking-widest">Tradução</span>
+
+            <div class="space-y-3 text-center">
+              <p class="font-display text-2xl text-amber-400 italic">
+                "{{ current()!.portuguese }}"
+              </p>
+              @if (current()!.tip) {
+                <p class="font-sans text-sm text-chalk/50 bg-ink-900/60 rounded-xl px-4 py-2">
+                  💡 {{ current()!.tip }}
+                </p>
+              }
+            </div>
+
+            <p class="font-mono text-xs text-chalk/20 text-center">Como você se saiu?</p>
+          </div>
+        </div>
+      </div>
+
+      @if (error()) {
+        <ui-error-banner [message]="error()" />
+      }
+
+      <div
+        [class]="'flex gap-3 w-full max-w-xl transition-all duration-300 ' +
+          (flipped() ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none')">
+        @for (btn of ratingButtons; track btn.id) {
+          <button
+            (click)="handleRating(btn.id)"
+            [disabled]="submitting()"
+            [class]="'flex-1 py-3 px-2 rounded-xl border border-ink-600 bg-ink-800 transition-all duration-150 ' + btn.hoverClass + ' text-chalk/50 group'">
+            <div class="font-sans font-medium text-sm group-hover:text-inherit">{{ btn.label }}</div>
+            <div class="font-mono text-xs text-chalk/25 mt-0.5">[{{ btn.key }}]</div>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,10 @@
+<div [class]="'flex-1 flex items-center justify-center animate-fade-in ' + className()">
+  <div class="text-center space-y-3">
+    <p class="text-4xl">{{ icon() }}</p>
+    <p class="font-display text-2xl text-chalk/60">{{ title() }}</p>
+    @if (description()) {
+      <p class="font-mono text-xs text-chalk/30">{{ description() }}</p>
+    }
+    <ng-content />
+  </div>
+</div>

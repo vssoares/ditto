@@ -1,0 +1,31 @@
+<div [class]="'space-y-1.5 ' + className()">
+  @if (label()) {
+    <ui-label className="mb-2">{{ label() }}</ui-label>
+  }
+
+  <div class="relative">
+    <input
+      [type]="inputType()"
+      [value]="value()"
+      (input)="onInput($event)"
+      [placeholder]="placeholder()"
+      [disabled]="disabled()"
+      [class]="inputClasses()" />
+
+    @if (isPassword()) {
+      <button
+        type="button"
+        (click)="showPassword.set(!showPassword())"
+        class="absolute right-3 top-1/2 -translate-y-1/2 text-chalk/30 hover:text-chalk/70 transition-colors font-mono text-xs">
+        {{ showPassword() ? 'hide' : 'show' }}
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="font-mono text-xs text-red-400">{{ error() }}</p>
+  }
+  @if (hint() && !error()) {
+    <p class="font-mono text-xs text-chalk/30">{{ hint() }}</p>
+  }
+</div>

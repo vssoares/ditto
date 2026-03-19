@@ -1,0 +1,25 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 animate-fade-in"
+    (click)="closed.emit()">
+    <div
+      [class]="'bg-ink-800 border border-ink-600 rounded-2xl p-8 w-full animate-fade-up shadow-2xl ' + widthClass()"
+      (click)="$event.stopPropagation()">
+      @if (title() || showClose()) {
+        <div class="flex items-center justify-between mb-6">
+          @if (title()) {
+            <h2 class="font-display text-2xl text-chalk">{{ title() }}</h2>
+          }
+          @if (showClose()) {
+            <button
+              (click)="closed.emit()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-ink-700 text-chalk/40 hover:text-chalk/80 transition-colors ml-auto">
+              ✕
+            </button>
+          }
+        </div>
+      }
+      <ng-content />
+    </div>
+  </div>
+}

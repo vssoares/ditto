@@ -1,0 +1,58 @@
+<div class="flex-1 min-h-0 flex items-center justify-center p-6 animate-fade-up">
+  <div class="w-full max-w-md space-y-8">
+    <div class="text-center">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono">
+        +
+      </div>
+      <h1 class="mt-5 font-display text-4xl text-chalk">
+        Criar <span class="text-amber-400 italic">Conta</span>
+      </h1>
+      <p class="mt-2 text-chalk/35 font-mono text-xs tracking-wider uppercase">
+        Email e senha · Sessão local
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <ui-text-input
+        label="Email"
+        type="email"
+        [value]="email()"
+        (valueChange)="email.set($event)"
+        placeholder="voce@exemplo.com"
+        [disabled]="loading()" />
+
+      <ui-text-input
+        label="Senha"
+        type="password"
+        [value]="password()"
+        (valueChange)="password.set($event)"
+        placeholder="mínimo 8 caracteres"
+        [disabled]="loading()" />
+
+      <ui-text-input
+        label="Confirmar senha"
+        type="password"
+        [value]="confirmPassword()"
+        (valueChange)="confirmPassword.set($event)"
+        placeholder="repita a senha"
+        [disabled]="loading()" />
+
+      <ui-error-banner [message]="error()" />
+
+      <ui-button [fullWidth]="true" size="lg" [loading]="loading()" (clicked)="handleRegister()">
+        Criar conta →
+      </ui-button>
+
+      <div class="flex items-center justify-center gap-2 text-xs font-mono text-chalk/25">
+        <span>Já tem conta?</span>
+        <button
+          type="button"
+          (click)="router.navigate(['/login'])"
+          class="text-amber-400/80 hover:text-amber-300 transition-colors"
+          [disabled]="loading()">
+          Entrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

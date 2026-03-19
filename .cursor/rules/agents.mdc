@@ -1,0 +1,67 @@
+You are an expert in TypeScript, Angular, and scalable web application development. You write maintainable, performant, and accessible code following Angular and TypeScript best practices.
+
+## TypeScript Best Practices
+
+- Use strict type checking
+- Prefer type inference when the type is obvious
+- Avoid the `any` type; use `unknown` when type is uncertain
+
+## Angular Best Practices
+
+- Always use standalone components over NgModules
+- Use signals for state management
+- Implement lazy loading for feature routes
+- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
+- Use `NgOptimizedImage` for all static images.
+  - `NgOptimizedImage` does not work for inline base64 images.
+
+## Components
+
+- Keep components small and focused on a single responsibility
+- Use `input()` and `output()` functions instead of decorators
+- Use `computed()` for derived state
+- Prefer inline templates for small components
+- Prefer Reactive forms instead of Template-driven ones
+- Do NOT use `changeDetection: ChangeDetectionStrategy.OnPush`
+- Do NOT use `ngClass`, use `class` bindings instead
+- Do NOT use `ngStyle`, use `style` bindings instead
+
+## State Management
+
+- Use signals for local component state
+- Use `computed()` for derived state
+- Keep state transformations pure and predictable
+- Do NOT use `mutate` on signals, use `update` or `set` instead
+
+## Templates
+
+- Keep templates simple and avoid complex logic
+- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
+- Use the async pipe to handle observables
+
+## Services
+
+- Design services around a single responsibility
+- Use the `providedIn: 'root'` option for singleton services
+- Use the `inject()` function instead of constructor injection
+
+
+## State Management (only for modules)
+- Use signals for state management
+- Use `computed()` for derived state
+- Keep state transformations pure and predictable
+- Do NOT use `mutate` on signals, use `update` or `set` instead
+- Use `invalidateCache()` to invalidate the cache of a state
+- Use `getList()` to get the list of a state
+- Use `create()` to create a new item in a state
+- Use `update()` to update an item in a state
+- Use `delete()` to delete an item in a state
+
+## Icons Reference
+
+- When suggesting or using icons, refer to the `.cursor/rules/icons.txt` file for the complete list of available Lucide icons
+- Icon names in the file follow the pattern: `lucide[IconName]` (e.g., `lucideUser`, `lucideHome`, `lucideSettings`)
+- When importing icons from `lucide-angular`, use the icon name without the `lucide` prefix (e.g., `User`, `Home`, `Settings`)
+- Always check the icons.txt file before suggesting an icon to ensure it exists in the available icon set
+
+- o nome do app é one Up one

@@ -1,0 +1,21 @@
+@if (layout() === 'card') {
+  <button
+    (click)="selected.emit()"
+    [class]="baseClasses() + ' flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl ' + className()">
+    @if (icon()) {
+      <span class="text-xl">{{ icon() }}</span>
+    }
+    <span class="font-sans text-xs font-medium">{{ label() }}</span>
+  </button>
+} @else {
+  <button
+    (click)="selected.emit()"
+    [class]="baseClasses() + ' py-3 px-4 rounded-xl text-left ' + className()">
+    <div [class]="'font-sans font-medium text-sm ' + (isSelected() ? 'text-amber-400' : 'text-chalk/70')">
+      {{ label() }}
+    </div>
+    @if (sublabel()) {
+      <div class="font-mono text-xs text-chalk/30 mt-0.5">{{ sublabel() }}</div>
+    }
+  </button>
+}

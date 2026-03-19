@@ -1,0 +1,13 @@
+<button
+  [disabled]="disabled() || loading()"
+  [class]="classes()"
+  (click)="clicked.emit()">
+  @if (loading()) {
+    <span class="flex items-center justify-center gap-2">
+      <span class="inline-block w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin"></span>
+      <ng-content />
+    </span>
+  } @else {
+    <ng-content />
+  }
+</button>
