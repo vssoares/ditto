@@ -1,6 +1,6 @@
 {
   "name": "ditto",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Aprenda inglês com frases geradas por IA e repetição espaçada",
   "main": "electron/main.js",
   "scripts": {
