@@ -27,7 +27,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 animate-fade-up">
+    <div className="flex-1 min-h-0 flex items-center justify-center p-6 animate-fade-up">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 font-mono">

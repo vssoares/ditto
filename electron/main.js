@@ -90,28 +90,4 @@ ipcMain.handle('update:install', () => {
   autoUpdater.quitAndInstall()
 })
 
-// const BACKEND_URL = 'http://localhost:3000
-const BACKEND_URL = 'http://scssgw80csoo8wg440ks8csg.86.48.22.217.sslip.io'
-
-// Generate phrases via backend
-ipcMain.handle('generate-phrases', async (_event, { topic, level, count }) => {
-  try {
-    console.log(`${BACKEND_URL}/phrases`);
-    
-    const response = await fetch(`${BACKEND_URL}/phrases`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, level, count }),
-    })
-
-    if (!response.ok) {
-      const text = await response.text()
-      return { success: false, error: `Erro ${response.status}: ${text}` }
-    }
-
-    const data = await response.json()
-    return { success: true, phrases: data.phrases }
-  } catch (error) {
-    return { success: false, error: error.message }
-  }
-})
+// Requests de API agora rodam no renderer (Vite) via VITE_BACKEND_URL

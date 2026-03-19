@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { Phrase } from '../utils/types'
+import { generatePhrases } from '../utils/phrasesApi'
+import { storage } from '../utils/storage'
 import { Button, Label, SelectOption, ErrorBanner } from './ui'
 import TextInput from './ui/TextInput'
 
@@ -46,21 +48,20 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
       : TOPICS.find((t) => t.id === topic)?.label ?? topic
 
     try {
-      const result = await window.electronAPI.generatePhrases({
+      const token = storage.getAccessToken()
+      if (!token) throw new Error('Não autenticado.')
+
+      const result = await generatePhrases({
         topic: topicLabel,
         level,
         count,
+        token,
       })
-      debugger
-      if (!result.success) {
-        setError(result.error ?? 'Erro ao gerar frases.')
-      } else if (result.phrases) {
-        const phrases: Phrase[] = result.phrases.map((p, i) => ({
-          id: `${Date.now()}_${i}`,
-          ...p,
-        }))
-        onGenerate(phrases)
-      }
+      const phrases: Phrase[] = result.phrases.map((p, i) => ({
+        id: `${Date.now()}_${i}`,
+        ...p,
+      }))
+      onGenerate(phrases)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro inesperado.')
     } finally {

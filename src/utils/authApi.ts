@@ -16,11 +16,10 @@ const authMeResponseSchema = z.object({
 })
 
 function getBackendUrl(): string {
-  // Em Vite, apenas variáveis com prefixo VITE_ chegam no renderer.
   return (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? 'http://localhost:3000'
 }
 
-async function requestJson(input: RequestInfo | URL, init?: RequestInit): Promise<unknown> {
+async function requestJson(input: string, init: RequestInit): Promise<unknown> {
   const res = await fetch(input, init)
   const text = await res.text()
 

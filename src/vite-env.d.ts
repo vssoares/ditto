@@ -1,22 +1,5 @@
 /// <reference types="vite/client" />
 
-interface ElectronGenerateParams {
-  topic: string
-  level: string
-  count: number
-}
-
-interface ElectronGenerateResult {
-  success: boolean
-  error?: string
-  phrases?: Array<{
-    english: string
-    portuguese: string
-    tip?: string
-    keywords?: string[]
-  }>
-}
-
 interface ElectronUpdateAPI {
   onChecking: (cb: () => void) => void
   onAvailable: (cb: (info: { version: string }) => void) => void
@@ -31,7 +14,6 @@ interface ElectronUpdateAPI {
 declare const __APP_VERSION__: string
 
 interface ElectronAPI {
-  generatePhrases: (params: ElectronGenerateParams) => Promise<ElectronGenerateResult>
   minimizeWindow?: () => void
   maximizeWindow?: () => void
   closeWindow?: () => void

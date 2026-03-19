@@ -9,7 +9,7 @@
     "release": "vite build && electron-builder --win --publish always",
     "vite": "vite",
     "electron": "electron .",
-    "start": "electron ."
+    "start": "concurrently \"vite\" \"wait-on http://localhost:8080"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
