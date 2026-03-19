@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { storage } from '../utils/storage'
 import type { Phrase } from '../utils/types'
 import { Button, Label, SelectOption, ErrorBanner } from './ui'
 
@@ -37,11 +36,6 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
   const [error, setError] = useState('')
 
   const handleGenerate = async () => {
-    const apiKey = storage.getApiKey()
-    if (!apiKey) {
-      setError('Configure sua OpenAI API Key nas configurações antes de gerar.')
-      return
-    }
     setError('')
     setLoading(true)
 
@@ -49,7 +43,6 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
 
     try {
       const result = await window.electronAPI.generatePhrases({
-        apiKey,
         topic: topicLabel,
         level,
         count,

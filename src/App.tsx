@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import TitleBar from './components/TitleBar'
+import UpdateBanner from './components/UpdateBanner'
 import GeneratorScreen from './components/GeneratorScreen'
 import StudyScreen from './components/StudyScreen'
 import LibraryScreen from './components/LibraryScreen'
-import SettingsModal from './components/SettingsModal'
-import { storage } from './utils/storage'
 import type { Phrase } from './utils/types'
 
 const NAV = [
@@ -17,7 +16,6 @@ type ScreenId = (typeof NAV)[number]['id'] | 'study'
 export default function App() {
   const [screen, setScreen] = useState<ScreenId>('generate')
   const [studyPhrases, setStudyPhrases] = useState<Phrase[] | null>(null)
-  const [showSettings, setShowSettings] = useState(!storage.getApiKey())
 
   const handleGenerate = (phrases: Phrase[]) => {
     const existing = storage.getPhrases()
@@ -63,6 +61,7 @@ export default function App() {
       />
 
       <TitleBar />
+      <UpdateBanner />
 
       <div className="flex flex-1 min-h-0 relative z-10">
         {/* Sidebar */}
@@ -89,16 +88,6 @@ export default function App() {
             {/* Spacer */}
             <div className="flex-1" />
 
-            {/* Settings button */}
-            <button
-              onClick={() => setShowSettings(true)}
-              title="Configurações"
-              className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-150 text-chalk/25 hover:text-chalk/60 hover:bg-ink-800 ${
-                !storage.getApiKey() ? 'text-amber-500/60 animate-pulse' : ''
-              }`}
-            >
-              ⚙
-            </button>
           </aside>
         )}
 
@@ -116,7 +105,6 @@ export default function App() {
         </main>
       </div>
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   )
 }

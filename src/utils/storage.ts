@@ -11,7 +11,6 @@ import type { Phrase, StudyStats } from './types'
 
 /** Chaves do localStorage usadas pelo app. */
 const KEYS = {
-  API_KEY: 'ditto_api_key',
   PHRASES: 'ditto_phrases',
   STATS: 'ditto_stats',
 } as const
@@ -19,14 +18,6 @@ const KEYS = {
 const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0 }
 
 export const storage = {
-  // ── API Key ────────────────────────────────────────────────────────────────
-
-  /** Retorna a OpenAI API Key salva, ou string vazia se não configurada. */
-  getApiKey: (): string => localStorage.getItem(KEYS.API_KEY) || '',
-
-  /** Salva a OpenAI API Key no localStorage. */
-  setApiKey: (key: string): void => localStorage.setItem(KEYS.API_KEY, key),
-
   // ── Frases ─────────────────────────────────────────────────────────────────
 
   /**

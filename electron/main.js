@@ -1,7 +1,12 @@
+require('dotenv').config()
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
+const { autoUpdater } = require('electron-updater')
 
 const isDev = process.env.NODE_ENV !== 'production'
+
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = true
 
 let mainWindow
 
@@ -28,7 +33,40 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow)
+function setupAutoUpdater() {
+  autoUpdater.on('checking-for-update', () => {
+    mainWindow.webContents.send('update:checking')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    mainWindow.webContents.send('update:available', info)
+  })
+
+  autoUpdater.on('update-not-available', () => {
+    mainWindow.webContents.send('update:not-available')
+  })
+
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow.webContents.send('update:progress', progress)
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update:downloaded')
+  })
+
+  autoUpdater.on('error', (err) => {
+    mainWindow.webContents.send('update:error', err.message)
+  })
+}
+
+app.whenReady().then(() => {
+  createWindow()
+
+  if (!isDev) {
+    setupAutoUpdater()
+    setTimeout(() => autoUpdater.checkForUpdates(), 3000)
+  }
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
@@ -46,8 +84,18 @@ ipcMain.on('window-maximize', () => {
 })
 ipcMain.on('window-close', () => mainWindow.close())
 
+// Auto-update controls
+ipcMain.handle('update:download', () => autoUpdater.downloadUpdate())
+ipcMain.handle('update:install', () => {
+  autoUpdater.quitAndInstall()
+})
+
 // OpenAI integration
-ipcMain.handle('generate-phrases', async (_event, { apiKey, topic, level, count }) => {
+ipcMain.handle('generate-phrases', async (_event, { topic, level, count }) => {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    return { success: false, error: 'OPENAI_API_KEY não definida no .env' }
+  }
   try {
     // Dynamic import to handle ESM module
     const { OpenAI } = await import('openai')
