@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Phrase } from '../utils/types'
 import { storage } from '../utils/storage'
 import { Button, Label, SelectOption, ErrorBanner } from './ui'
+import TextInput from './ui/TextInput'
 
 const TOPICS = [
   { id: 'daily', label: 'Cotidiano', icon: '☀' },
@@ -31,6 +32,8 @@ interface GeneratorScreenProps {
 
 export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
   const [topic, setTopic] = useState<TopicId>('daily')
+  const [customTopic, setCustomTopic] = useState('')
+  const [apiKey, setApiKey] = useState(() => storage.getApiKey())
   const [level, setLevel] = useState<LevelId>('beginner')
   const [count, setCount] = useState<10 | 5 | 15 | 20>(10)
   const [loading, setLoading] = useState(false)
@@ -40,11 +43,22 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
     setError('')
     setLoading(true)
 
-    const topicLabel = TOPICS.find((t) => t.id === topic)?.label ?? topic
+    const trimmedApiKey = apiKey.trim()
+    if (!trimmedApiKey) {
+      setLoading(false)
+      setError('Informe sua OpenAI API Key para gerar frases.')
+      return
+    }
+
+    storage.setApiKey(trimmedApiKey)
+
+    const topicLabel = customTopic.trim()
+      ? customTopic.trim()
+      : TOPICS.find((t) => t.id === topic)?.label ?? topic
 
     try {
       const result = await window.electronAPI.generatePhrases({
-        apiKey: storage.getApiKey(),
+        apiKey: trimmedApiKey,
         topic: topicLabel,
         level,
         count,
@@ -90,10 +104,25 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
                 layout="card"
                 icon={t.icon}
                 label={t.label}
-                selected={topic === t.id}
-                onSelect={() => setTopic(t.id)}
+                selected={!customTopic && topic === t.id}
+                onSelect={() => { setTopic(t.id); setCustomTopic('') }}
               />
             ))}
+          </div>
+          <div className="mt-3 relative">
+            <TextInput
+              value={customTopic}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setCustomTopic(e.target.value.slice(0, 50))
+              }
+              placeholder="Ou digite um tópico personalizado..."
+              disabled={loading}
+            />
+            {customTopic && (
+              <span className="pointer-events-none absolute right-4 top-[46px] -translate-y-1/2 font-mono text-[10px] text-chalk/25">
+                {customTopic.length}/50
+              </span>
+            )}
           </div>
         </div>
 
@@ -124,7 +153,7 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
                 label={String(c)}
                 selected={count === c}
                 onSelect={() => setCount(c)}
-                className="w-14 h-10 !py-0 !px-0 justify-center items-center flex"
+                className="w-14 h-10 py-0! px-0! justify-center items-center flex"
               />
             ))}
           </div>
