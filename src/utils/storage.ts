@@ -13,6 +13,7 @@ import type { Phrase, StudyStats } from './types'
 const KEYS = {
   PHRASES: 'ditto_phrases',
   STATS: 'ditto_stats',
+  API_KEY: 'ditto_api_key',
 } as const
 
 const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0 }
@@ -74,4 +75,10 @@ export const storage = {
     storage.setStats(stats)
     return stats
   },
+
+  // ── API Key ────────────────────────────────────────────────────────────────
+
+  getApiKey: (): string =>
+    typeof localStorage !== 'undefined' ? localStorage.getItem(KEYS.API_KEY) ?? '' : '',
+  setApiKey: (key: string): void => localStorage.setItem(KEYS.API_KEY, key),
 }

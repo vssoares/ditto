@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Phrase } from '../utils/types'
+import { storage } from '../utils/storage'
 import { Button, Label, SelectOption, ErrorBanner } from './ui'
 
 const TOPICS = [
@@ -43,11 +44,12 @@ export default function GeneratorScreen({ onGenerate }: GeneratorScreenProps) {
 
     try {
       const result = await window.electronAPI.generatePhrases({
+        apiKey: storage.getApiKey(),
         topic: topicLabel,
         level,
         count,
       })
-
+      debugger
       if (!result.success) {
         setError(result.error ?? 'Erro ao gerar frases.')
       } else if (result.phrases) {

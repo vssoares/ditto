@@ -1,9 +1,8 @@
-require('dotenv').config()
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 const { autoUpdater } = require('electron-updater')
 
-const isDev = process.env.NODE_ENV !== 'production'
+const isDev = !app.isPackaged
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
@@ -28,6 +27,7 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:8080')
+    // mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
@@ -90,59 +90,27 @@ ipcMain.handle('update:install', () => {
   autoUpdater.quitAndInstall()
 })
 
-// OpenAI integration
+// const BACKEND_URL = 'http://localhost:3000
+const BACKEND_URL = 'http://scssgw80csoo8wg440ks8csg.86.48.22.217.sslip.io'
+
+// Generate phrases via backend
 ipcMain.handle('generate-phrases', async (_event, { topic, level, count }) => {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) {
-    return { success: false, error: 'OPENAI_API_KEY não definida no .env' }
-  }
   try {
-    // Dynamic import to handle ESM module
-    const { OpenAI } = await import('openai')
-    const client = new OpenAI({ apiKey })
-
-    const levelMap = {
-      beginner: 'A1/A2 (básico)',
-      intermediate: 'B1/B2 (intermediário)',
-      advanced: 'C1/C2 (avançado)',
-    }
-
-    const prompt = `Gere exatamente ${count} frases em inglês para aprendizado.
-
-Nível: ${levelMap[level] || level}
-Tópico: ${topic}
-
-Retorne um JSON com a chave "phrases" contendo um array de objetos:
-{
-  "phrases": [
-    {
-      "english": "a frase em inglês",
-      "portuguese": "a tradução em português brasileiro",
-      "tip": "uma dica curta sobre gramática ou vocabulário (em português)",
-      "keywords": ["palavra1", "palavra2"]
-    }
-  ]
-}
-
-Regras:
-- Frases naturais e do uso cotidiano real
-- Traduções precisas em português brasileiro
-- Dicas práticas e relevantes
-- 2-3 keywords por frase
-- Retorne APENAS o JSON`
-
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8,
-      response_format: { type: 'json_object' },
+    console.log(`${BACKEND_URL}/phrases`);
+    
+    const response = await fetch(`${BACKEND_URL}/phrases`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, level, count }),
     })
 
-    const content = response.choices[0].message.content
-    const parsed = JSON.parse(content)
-    const phrases = parsed.phrases || (Array.isArray(parsed) ? parsed : Object.values(parsed)[0])
+    if (!response.ok) {
+      const text = await response.text()
+      return { success: false, error: `Erro ${response.status}: ${text}` }
+    }
 
-    return { success: true, phrases }
+    const data = await response.json()
+    return { success: true, phrases: data.phrases }
   } catch (error) {
     return { success: false, error: error.message }
   }

@@ -5,6 +5,7 @@ import GeneratorScreen from './components/GeneratorScreen'
 import StudyScreen from './components/StudyScreen'
 import LibraryScreen from './components/LibraryScreen'
 import type { Phrase } from './utils/types'
+import { storage } from './utils/storage'
 
 const NAV = [
   { id: 'generate', label: 'Gerar', icon: '✦' },
