@@ -104,7 +104,7 @@ export class StudyScreenComponent {
     if (!this.flipped()) this.flipped.set(true);
   }
 
-  async handleRating(rating: Rating): Promise<void> {
+  handleRating(rating: Rating): void {
     if (!this.flipped() || !this.current()) return;
     if (this.submitting()) return;
 
@@ -117,25 +117,27 @@ export class StudyScreenComponent {
     this.submitting.set(true);
     this.error.set('');
 
-    debugger
-    try {
-      await this.phrasesApi.reviewPhrase({
-        token,
-        phraseId: this.current()?.phraseId ?? '',
-        rating,
-      });
-      this.sessionStats.update((s) => ({ ...s, [rating]: s[rating] + 1 }));
-      this.flipped.set(false);
+    const phraseId = this.current()?.phraseId ?? '';
+    const isLast = this.index() + 1 >= this.phrases().length;
 
-      if (this.index() + 1 >= this.phrases().length) {
-        this.done.set(true);
-      } else {
-        this.index.update((i) => i + 1);
-      }
-    } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Erro inesperado.');
-    } finally {
-      this.submitting.set(false);
-    }
+    // Atualiza a UI imediatamente (sem esperar o back).
+    this.sessionStats.update((s) => ({ ...s, [rating]: s[rating] + 1 }));
+    this.flipped.set(false);
+    if (isLast) this.done.set(true);
+    else this.index.update((i) => i + 1);
+
+    // Libera a UI imediatamente para o usuário continuar
+    // sem depender do tempo de resposta do back.
+    this.submitting.set(false);
+
+    void this.phrasesApi
+      .reviewPhrase({
+        token,
+        phraseId,
+        rating,
+      })
+      .catch((err) => {
+        this.error.set(err instanceof Error ? err.message : 'Erro inesperado.');
+      });
   }
 }
