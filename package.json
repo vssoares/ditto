@@ -1,15 +1,15 @@
 {
   "name": "ditto",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Aprenda inglês com frases geradas por IA e repetição espaçada",
   "main": "electron/main.js",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production",
     "dev": "concurrently \"ng serve\" \"wait-on http://localhost:8080 && electron .\"",
-    "build:electron": "ng build && electron-builder --win",
-    "release": "ng build && electron-builder --win --publish always",
+    "build:electron": "ng build --configuration production && electron-builder --win",
+    "release": "ng build --configuration production && electron-builder --win --publish always",
     "electron": "electron ."
   },
   "dependencies": {
