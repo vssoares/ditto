@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 
 interface ElectronGenerateParams {
-  apiKey: string
   topic: string
   level: string
   count: number
