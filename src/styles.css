@@ -51,12 +51,14 @@
     overflow: hidden;
     user-select: none;
     -webkit-app-region: no-drag;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   app-root {
     display: block;
     width: 100vw;
-    height: 100vh;
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     overflow: hidden;
   }
 }
