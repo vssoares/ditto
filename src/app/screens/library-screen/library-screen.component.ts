@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter as rxFilter } from 'rxjs/operators';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ButtonComponent } from '../../ui/button/button.component';
 import { BadgeComponent } from '../../ui/badge/badge.component';
 import { CardComponent } from '../../ui/card/card.component';
@@ -34,6 +35,7 @@ function formatNextReview(ts: number | undefined, now: number): string {
     EmptyStateComponent,
     SpinnerComponent,
     ErrorBannerComponent,
+    ScrollingModule,
   ],
   templateUrl: './library-screen.component.html',
 })
@@ -141,5 +143,9 @@ export class LibraryScreenComponent {
 
   formatReview(ts: number | undefined): string {
     return formatNextReview(ts, this.now);
+  }
+
+  trackByPhraseId(_index: number, phrase: Phrase): string {
+    return phrase.id;
   }
 }

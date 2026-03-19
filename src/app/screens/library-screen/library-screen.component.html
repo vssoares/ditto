@@ -35,7 +35,7 @@
       <ui-filter-pill [options]="filterOptions()" [value]="filter()" (changed)="onTabChanged($event)" />
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 pb-6 gap-2 flex flex-col">
+    <div class="flex-1 min-h-0 px-3 sm:px-6 pb-4 sm:pb-6">
       @if (!loading() && !error() && phrases().length === 0) {
         <div class="flex-1 flex items-center justify-center p-6">
           <div class="w-full max-w-md">
@@ -46,44 +46,54 @@
           </div>
         </div>
       } @else {
-        @for (phrase of filtered(); track phrase.id) {
-          <ui-card [hoverable]="true" (clicked)="toggleExpand(phrase.id)">
-            <div class="p-4 flex items-center justify-between gap-4">
-              <div class="flex-1 min-w-0">
-                <p class="font-display text-chalk text-lg truncate">"{{ phrase.english }}"</p>
-      
-                @if (expandedId() === phrase.id) {
-                  <div class="mt-3 space-y-2 animate-fade-in">
-                    <p class="font-sans text-amber-400/80 text-sm italic">
-                      "{{ phrase.portuguese }}"
-                    </p>
-                    @if (phrase.tip) {
-                      <p class="font-sans text-xs text-chalk/40 bg-ink-900 rounded-lg px-3 py-2">
-                        💡 {{ phrase.tip }}
+        <cdk-virtual-scroll-viewport
+          class="h-full w-full"
+          [itemSize]="118"
+          [minBufferPx]="472"
+          [maxBufferPx]="944">
+          <div
+            *cdkVirtualFor="let phrase of filtered(); trackBy: trackByPhraseId"
+            class="pb-2">
+            <ui-card [hoverable]="true" (clicked)="toggleExpand(phrase.id)">
+              <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <div class="flex-1 min-w-0">
+                  <p class="font-display text-chalk text-base sm:text-lg leading-snug wrap-break-word">
+                    "{{ phrase.english }}"
+                  </p>
+        
+                  @if (expandedId() === phrase.id) {
+                    <div class="mt-3 space-y-2 animate-fade-in">
+                      <p class="font-sans text-amber-400/80 text-sm italic wrap-break-word">
+                        "{{ phrase.portuguese }}"
                       </p>
-                    }
-                    <div class="flex gap-1 flex-wrap">
-                      @for (kw of phrase.keywords ?? []; track kw) {
-                        <ui-badge>{{ kw }}</ui-badge>
+                      @if (phrase.tip) {
+                        <p class="font-sans text-xs text-chalk/40 bg-ink-900 rounded-lg px-3 py-2 wrap-break-word">
+                          💡 {{ phrase.tip }}
+                        </p>
                       }
+                      <div class="flex gap-1 flex-wrap">
+                        @for (kw of phrase.keywords ?? []; track kw) {
+                          <ui-badge>{{ kw }}</ui-badge>
+                        }
+                      </div>
                     </div>
-                  </div>
-                }
+                  }
+                </div>
+        
+                <div class="flex items-center gap-3 shrink-0 self-start sm:self-auto">
+                  @if (phrase.rating) {
+                    <ui-badge variant="rating" [rating]="phrase.rating">
+                      {{ phrase.rating }}
+                    </ui-badge>
+                  }
+                  <span class="font-mono text-xs text-chalk/25">
+                    {{ formatReview(phrase.nextReview) }}
+                  </span>
+                </div>
               </div>
-      
-              <div class="flex items-center gap-3 shrink-0">
-                @if (phrase.rating) {
-                  <ui-badge variant="rating" [rating]="phrase.rating">
-                    {{ phrase.rating }}
-                  </ui-badge>
-                }
-                <span class="font-mono text-xs text-chalk/25">
-                  {{ formatReview(phrase.nextReview) }}
-                </span>
-              </div>
-            </div>
-          </ui-card>
-        }
+            </ui-card>
+          </div>
+        </cdk-virtual-scroll-viewport>
       }
     </div>
   </div>

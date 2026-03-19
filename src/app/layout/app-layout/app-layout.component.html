@@ -1,5 +1,40 @@
 @if (!isStudyRoute()) {
-  <aside class="w-16 flex flex-col items-center py-4 gap-2 border-r border-ink-700 bg-ink-950 shrink-0">
+  <div
+    [class]="'md:hidden fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 ' +
+      (mobileMenuOpen() ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')"
+    (click)="closeMobileMenu()"></div>
+
+  <aside
+    [class]="'md:hidden fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col p-4 pt-14 gap-2 border-r border-ink-700 bg-ink-950 transition-transform duration-200 ease-out ' +
+      (mobileMenuOpen() ? 'translate-x-0' : '-translate-x-full')">
+    <div class="flex items-center justify-between mb-2">
+      <span class="font-mono text-xs text-amber-500/70 uppercase tracking-wider">Menu</span>
+      <button class="cursor-pointer text-chalk/60 hover:text-chalk" (click)="closeMobileMenu()">✕</button>
+    </div>
+
+    @for (item of nav; track item.id) {
+      <button
+        (click)="navigateTo(item.path)"
+        [class]="'cursor-pointer w-full h-11 px-3 flex items-center gap-3 rounded-xl transition-all duration-150 relative text-left ' +
+        (isActive(item.path)
+          ? 'bg-amber-500/15 text-amber-400'
+          : 'text-chalk/50 hover:text-chalk/80 hover:bg-ink-800')">
+        <span class="text-base">{{ item.icon }}</span>
+        <span class="font-sans text-sm">{{ item.label }}</span>
+      </button>
+    }
+
+    <div class="flex-1"></div>
+
+    <button
+      (click)="handleLogout()"
+      class="cursor-pointer w-full h-11 px-3 flex items-center gap-3 rounded-xl transition-all duration-150 text-left text-red-400 hover:text-red-300 hover:bg-red-900/20 border border-red-900/30">
+      <span class="text-base">↪</span>
+      <span class="font-sans text-sm">Sair</span>
+    </button>
+  </aside>
+
+  <aside class="hidden md:flex w-16 flex-col items-center py-4 gap-2 border-r border-ink-700 bg-ink-950 shrink-0">
     @for (item of nav; track item.id) {
       <app-tooltip [text]="item.label" position="right">
         <button

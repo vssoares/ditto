@@ -1,8 +1,8 @@
-<div class="flex-1 overflow-y-auto p-6 animate-fade-up">
-  <div class="max-w-2xl mx-auto space-y-8">
+<div class="flex-1 overflow-y-auto p-3 sm:p-6 animate-fade-up">
+  <div class="max-w-2xl mx-auto space-y-6 sm:space-y-8">
 
-    <div class="text-center pt-4">
-      <h1 class="font-display text-4xl text-chalk mb-2">
+    <div class="text-center pt-2 sm:pt-4">
+      <h1 class="font-display text-3xl sm:text-4xl text-chalk mb-2">
         Gerar <span class="text-amber-400 italic">Frases</span>
       </h1>
       <p class="text-chalk/40 font-mono text-xs tracking-wider uppercase">
@@ -12,7 +12,7 @@
 
     <div>
       <ui-label className="mb-3">Tópico</ui-label>
-      <div class="grid grid-cols-4 gap-2">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
         @for (t of topics; track t.id) {
           <ui-select-option
             layout="card"
@@ -39,7 +39,7 @@
 
     <div>
       <ui-label className="mb-3">Nível</ui-label>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         @for (l of levels; track l.id) {
           <ui-select-option
             layout="pill"
@@ -54,13 +54,13 @@
 
     <div>
       <ui-label className="mb-3">Quantidade de frases</ui-label>
-      <div class="flex gap-2">
+      <div class="grid grid-cols-4 gap-2 sm:flex sm:gap-2">
         @for (c of counts; track c) {
           <ui-select-option
             [label]="'' + c"
             [isSelected]="count() === c"
             (selected)="count.set(c)"
-            className="w-14 h-10 py-0! px-0! justify-center items-center flex" />
+            className="w-full sm:w-14 h-10 py-0! px-0! justify-center items-center flex" />
         }
       </div>
     </div>

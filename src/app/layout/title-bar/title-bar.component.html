@@ -1,5 +1,12 @@
 <div class="drag flex items-center justify-between px-4 h-10 bg-ink-950 border-b border-ink-700 shrink-0">
   <div class="flex items-center gap-2 no-drag">
+    @if (showMobileMenuButton()) {
+      <button
+        class="md:hidden w-8 h-8 rounded-lg border border-ink-700 bg-ink-900/90 text-chalk/80 hover:text-chalk cursor-pointer transition-transform duration-150 active:scale-95"
+        (click)="toggleMobileMenu()">
+        ☰
+      </button>
+    }
     <div class="w-2 h-2 rounded-full bg-amber-500 opacity-60"></div>
     <span class="font-mono text-xs text-amber-500/60 tracking-widest uppercase">
       Ditto
