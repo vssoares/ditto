@@ -5,7 +5,7 @@
     (click)="closeMobileMenu()"></div>
 
   <aside
-    [class]="'md:hidden fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col p-4 pt-14 gap-2 border-r border-ink-700 bg-ink-950 transition-transform duration-200 ease-out ' +
+    [class]="'md:hidden fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col p-4 pt-14 pb-[calc(1rem+env(safe-area-inset-bottom))] gap-2 border-r border-ink-700 bg-ink-950 transition-transform duration-200 ease-out ' +
       (mobileMenuOpen() ? 'translate-x-0' : '-translate-x-full')">
     <div class="flex items-center justify-between mb-2">
       <span class="font-mono text-xs text-amber-500/70 uppercase tracking-wider">Menu</span>
