@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ElectronService } from '../../services/electron.service';
 import { TooltipComponent } from '../../core/components/tooltip/tooltip.component';
+import packageJson from '../../../../package.json';
 
 @Component({
   selector: 'app-title-bar',
@@ -9,5 +10,5 @@ import { TooltipComponent } from '../../core/components/tooltip/tooltip.componen
 })
 export class TitleBarComponent {
   readonly electron = inject(ElectronService);
-  readonly version = '1.0.4';
+  readonly version = packageJson.version;
 }

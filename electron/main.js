@@ -4,7 +4,8 @@ const { autoUpdater } = require('electron-updater')
 
 const isDev = !app.isPackaged
 
-autoUpdater.autoDownload = false
+// Fluxo automático: ao encontrar update, baixa sem clique.
+autoUpdater.autoDownload = true
 autoUpdater.autoInstallOnAppQuit = true
 
 let mainWindow
@@ -52,6 +53,11 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-downloaded', () => {
     mainWindow.webContents.send('update:downloaded')
+    mainWindow.webContents.send('update:installing')
+    // Dá tempo do renderer mostrar a telinha "instalando..."
+    setTimeout(() => {
+      autoUpdater.quitAndInstall()
+    }, 1200)
   })
 
   autoUpdater.on('error', (err) => {
@@ -64,7 +70,7 @@ app.whenReady().then(() => {
 
   if (!isDev) {
     setupAutoUpdater()
-    setTimeout(() => autoUpdater.checkForUpdates(), 3000)
+    setTimeout(() => autoUpdater.checkForUpdates(), 1200)
   }
 })
 

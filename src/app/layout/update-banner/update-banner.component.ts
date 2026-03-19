@@ -12,7 +12,7 @@ export class UpdateBannerComponent {
 
   readonly visible = computed(() => {
     const s = this.state().status;
-    return s === 'available' || s === 'downloading' || s === 'downloaded';
+    return s !== 'idle';
   });
 
   asAvailable(s: UpdateState): Extract<UpdateState, { status: 'available' }> {
@@ -21,5 +21,9 @@ export class UpdateBannerComponent {
 
   asDownloading(s: UpdateState): Extract<UpdateState, { status: 'downloading' }> {
     return s as Extract<UpdateState, { status: 'downloading' }>;
+  }
+
+  asError(s: UpdateState): Extract<UpdateState, { status: 'error' }> {
+    return s as Extract<UpdateState, { status: 'error' }>;
   }
 }

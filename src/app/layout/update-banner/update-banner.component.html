@@ -1,26 +1,43 @@
 @if (visible()) {
-  <div class="relative z-50 flex items-center justify-between px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-400/90">
-    @switch (state().status) {
-      @case ('available') {
-        <span>Nova versão disponível: <strong>{{ asAvailable(state()).version }}</strong></span>
-        <button
-          (click)="electron.downloadUpdate()"
-          class="ml-4 px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 transition-colors font-mono">
-          Baixar
-        </button>
-      }
-      @case ('downloading') {
-        <span>Baixando atualização...</span>
-        <span class="font-mono">{{ asDownloading(state()).percent }}%</span>
-      }
-      @case ('downloaded') {
-        <span>Atualização pronta para instalar</span>
-        <button
-          (click)="electron.installUpdate()"
-          class="ml-4 px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 transition-colors font-mono">
-          Reiniciar e instalar
-        </button>
-      }
-    }
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-2xl border border-ink-700 bg-ink-900/95 p-5 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
+        <h3 class="font-display text-lg text-chalk">Atualização do Ditto</h3>
+      </div>
+
+      <div class="mt-4 font-mono text-xs text-chalk/70">
+        @switch (state().status) {
+          @case ('checking') {
+            <p>Buscando atualizações...</p>
+          }
+          @case ('available') {
+            <p>Nova versão encontrada: <span class="text-amber-400">{{ asAvailable(state()).version }}</span></p>
+            <p class="mt-1 text-chalk/50">Baixando automaticamente...</p>
+          }
+          @case ('downloading') {
+            <p>Baixando atualização...</p>
+            <div class="mt-3 h-2 w-full rounded-full bg-ink-800 overflow-hidden">
+              <div
+                class="h-full bg-amber-500 transition-all duration-150"
+                [style.width.%]="asDownloading(state()).percent"></div>
+            </div>
+            <p class="mt-2 text-chalk/50">{{ asDownloading(state()).percent }}%</p>
+          }
+          @case ('downloaded') {
+            <p>Atualização baixada.</p>
+            <p class="mt-1 text-chalk/50">Preparando instalação...</p>
+          }
+          @case ('installing') {
+            <p>Instalando atualização...</p>
+            <p class="mt-1 text-chalk/50">O app será reiniciado automaticamente.</p>
+          }
+          @case ('error') {
+            <p class="text-red-400">Falha ao atualizar.</p>
+            <p class="mt-1 text-chalk/50">{{ asError(state()).message }}</p>
+          }
+        }
+      </div>
+    </div>
   </div>
 }

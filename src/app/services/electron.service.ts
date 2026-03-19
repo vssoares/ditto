@@ -6,6 +6,7 @@ interface ElectronUpdateAPI {
   onNotAvailable: (cb: () => void) => void;
   onProgress: (cb: (progress: { percent: number }) => void) => void;
   onDownloaded: (cb: () => void) => void;
+  onInstalling: (cb: () => void) => void;
   onError: (cb: (message: string) => void) => void;
   download: () => Promise<void>;
   install: () => Promise<void>;
@@ -26,9 +27,11 @@ declare global {
 
 export type UpdateState =
   | { status: 'idle' }
+  | { status: 'checking' }
   | { status: 'available'; version: string }
   | { status: 'downloading'; percent: number }
   | { status: 'downloaded' }
+  | { status: 'installing' }
   | { status: 'error'; message: string };
 
 @Injectable({ providedIn: 'root' })
@@ -66,14 +69,23 @@ export class ElectronService {
   initUpdateListeners(): void {
     if (!this.api?.update) return;
 
+    this.api.update.onChecking(() =>
+      this.updateState.set({ status: 'checking' })
+    );
     this.api.update.onAvailable((info: { version: string }) =>
       this.updateState.set({ status: 'available', version: info.version })
+    );
+    this.api.update.onNotAvailable(() =>
+      this.updateState.set({ status: 'idle' })
     );
     this.api.update.onProgress((p: { percent: number }) =>
       this.updateState.set({ status: 'downloading', percent: Math.floor(p.percent) })
     );
     this.api.update.onDownloaded(() =>
       this.updateState.set({ status: 'downloaded' })
+    );
+    this.api.update.onInstalling(() =>
+      this.updateState.set({ status: 'installing' })
     );
     this.api.update.onError((msg: string) =>
       this.updateState.set({ status: 'error', message: msg })
