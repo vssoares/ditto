@@ -1,3 +1,5 @@
+import { version } from '../../package.json'
+
 export default function TitleBar() {
   const minimize = () => window.electronAPI?.minimizeWindow()
   const maximize = () => window.electronAPI?.maximizeWindow()
@@ -9,6 +11,9 @@ export default function TitleBar() {
         <div className="w-2 h-2 rounded-full bg-amber-500 opacity-60" />
         <span className="font-mono text-xs text-amber-500/60 tracking-widest uppercase">
           Ditto
+        </span>
+        <span className="font-mono text-[10px] text-ink-600 tracking-wide">
+          v{version}
         </span>
       </div>
 
