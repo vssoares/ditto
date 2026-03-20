@@ -96,6 +96,10 @@
   background: #f59e0b;
 }
 
+body {
+  min-height: -webkit-fill-available !important;
+}
+
 /* Card flip animation */
 .perspective {
   perspective: 1000px;
