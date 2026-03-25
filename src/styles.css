@@ -65,8 +65,8 @@
     background-color: #0a0908;
     color: #f5f0e8;
     font-family: 'Sora', sans-serif;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    /* padding-top: env(safe-area-inset-top); */
+    /* padding-bottom: env(safe-area-inset-bottom); */
   }
 
   app-root {

@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-title-bar',
+  host: { class: 'sticky top-0 z-50 shrink-0' },
   imports: [TooltipComponent],
   templateUrl: './title-bar.component.html',
 })
