@@ -12,7 +12,7 @@ const NAV = [
 
 @Component({
   selector: 'app-layout',
-  host: { class: 'flex flex-1 min-h-0' },
+  host: { class: 'flex flex-1' },
   imports: [RouterOutlet, TooltipComponent],
   templateUrl: './app-layout.component.html',
 })
