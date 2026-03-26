@@ -4,9 +4,9 @@ const { autoUpdater } = require('electron-updater')
 
 const isDev = !app.isPackaged
 
-// Fluxo automático: ao encontrar update, baixa sem clique.
+// Download automático, mas instalação requer confirmação do usuário via IPC.
 autoUpdater.autoDownload = true
-autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.autoInstallOnAppQuit = false
 
 let mainWindow
 
@@ -52,12 +52,9 @@ function setupAutoUpdater() {
   })
 
   autoUpdater.on('update-downloaded', () => {
+    // Notifica o renderer para exibir o diálogo de confirmação ao usuário.
+    // A instalação só ocorre quando o renderer chamar update:install via IPC.
     mainWindow.webContents.send('update:downloaded')
-    mainWindow.webContents.send('update:installing')
-    // Dá tempo do renderer mostrar a telinha "instalando..."
-    setTimeout(() => {
-      autoUpdater.quitAndInstall()
-    }, 1200)
   })
 
   autoUpdater.on('error', (err) => {
