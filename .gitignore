@@ -50,3 +50,11 @@ release/
 
 # Angular
 .angular/
+
+# Claude
+.claude/
+
+# Cursor
+.cursor/
+
+.agents/
