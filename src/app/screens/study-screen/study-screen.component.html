@@ -23,6 +23,7 @@
   </div>
 } @else if (current()) {
   <div class="flex-1 flex flex-col p-6 pb-safe-6 md:pb-6 animate-fade-in">
+    <h1 class="sr-only">Sessão de revisão de frases em inglês</h1>
     <div class="flex items-center gap-4 mb-6">
       <ui-button variant="ghost" size="sm" (clicked)="back.emit()">← voltar</ui-button>
       <ui-progress-bar [value]="index()" [max]="phrases().length" className="flex-1" />

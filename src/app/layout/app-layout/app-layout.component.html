@@ -9,7 +9,9 @@
       (mobileMenuOpen() ? 'translate-x-0' : '-translate-x-full')">
     <div class="flex items-center justify-between mb-2">
       <span class="font-mono text-xs text-amber-500/70 uppercase tracking-wider">Menu</span>
-      <button class="cursor-pointer text-chalk/60 hover:text-chalk" (click)="closeMobileMenu()">✕</button>
+      <button type="button" aria-label="Fechar menu" class="cursor-pointer text-chalk/60 hover:text-chalk" (click)="closeMobileMenu()">
+        <span aria-hidden="true">✕</span>
+      </button>
     </div>
 
     @for (item of nav; track item.id) {

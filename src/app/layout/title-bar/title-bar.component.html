@@ -2,9 +2,11 @@
   <div class="flex items-center gap-2 no-drag">
     @if (showMobileMenuButton()) {
       <button
+        type="button"
+        aria-label="Abrir menu"
         class="md:hidden w-8 h-8 rounded-lg border border-ink-700 bg-ink-900/90 text-chalk/80 hover:text-chalk cursor-pointer transition-transform duration-150 active:scale-95"
         (click)="toggleMobileMenu()">
-        ☰
+        <span aria-hidden="true">☰</span>
       </button>
     }
     <div class="w-2 h-2 rounded-full bg-amber-500 opacity-60"></div>
@@ -19,23 +21,29 @@
   <div class="no-drag flex items-center gap-1">
     <app-tooltip text="Minimizar" position="bottom">
       <button
+        type="button"
+        aria-label="Minimizar janela"
         (click)="electron.minimize()"
         class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
-        ─
+        <span aria-hidden="true">─</span>
       </button>
     </app-tooltip>
     <app-tooltip text="Maximizar" position="bottom">
       <button
+        type="button"
+        aria-label="Maximizar janela"
         (click)="electron.maximize()"
         class="w-7 h-7 flex items-center justify-center rounded hover:bg-ink-700 text-chalk/30 hover:text-chalk/60 transition-colors text-xs">
-        □
+        <span aria-hidden="true">□</span>
       </button>
     </app-tooltip>
     <app-tooltip text="Fechar" position="bottom">
       <button
+        type="button"
+        aria-label="Fechar janela"
         (click)="electron.close()"
         class="w-7 h-7 flex items-center justify-center rounded hover:bg-red-900/50 text-chalk/30 hover:text-red-400 transition-colors text-sm">
-        ✕
+        <span aria-hidden="true">✕</span>
       </button>
     </app-tooltip>
   </div>

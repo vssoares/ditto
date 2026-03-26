@@ -12,9 +12,11 @@
           }
           @if (showClose()) {
             <button
+              type="button"
+              aria-label="Fechar modal"
               (click)="closed.emit()"
               class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-ink-700 text-chalk/40 hover:text-chalk/80 transition-colors ml-auto">
-              ✕
+              <span aria-hidden="true">✕</span>
             </button>
           }
         </div>

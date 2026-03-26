@@ -16,7 +16,11 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "assets": [],
+            "assets": [
+              "src/favicon.svg",
+              "src/robots.txt",
+              "src/sitemap.xml"
+            ],
             "styles": [
               "src/styles.css"
             ],

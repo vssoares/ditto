@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ButtonComponent } from '../../../ui/button/button.component';
 import { TextInputComponent } from '../../../ui/text-input/text-input.component';
 import { ErrorBannerComponent } from '../../../ui/error-banner/error-banner.component';
@@ -9,7 +9,7 @@ import { StorageService } from '../../../services/storage.service';
 @Component({
   selector: 'app-login-screen',
   host: { class: 'flex flex-1 min-h-0' },
-  imports: [ButtonComponent, TextInputComponent, ErrorBannerComponent],
+  imports: [ButtonComponent, TextInputComponent, ErrorBannerComponent, RouterLink],
   templateUrl: './login-screen.component.html',
 })
 export class LoginScreenComponent {

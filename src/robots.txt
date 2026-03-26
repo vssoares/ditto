@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dittoapp.com.br/sitemap.xml
