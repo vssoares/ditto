@@ -107,6 +107,10 @@
   }
 }
 
+html {
+  overflow-x: hidden;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
