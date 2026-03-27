@@ -19,4 +19,5 @@ export interface StudyStats {
   reviewed: number;
   easy: number;
   hard: number;
+  score: number;
 }

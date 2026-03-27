@@ -17,11 +17,13 @@ interface SessionStats {
   again: number;
 }
 
-const RATING_BUTTONS: { id: Rating; label: string; key: string; hoverClass: string }[] = [
-  { id: 'again', label: 'De novo', key: '1', hoverClass: 'hover:bg-red-900/40 hover:border-red-700 hover:text-red-400' },
-  { id: 'hard', label: 'Difícil', key: '2', hoverClass: 'hover:bg-orange-900/40 hover:border-orange-700 hover:text-orange-400' },
-  { id: 'ok', label: 'Ok', key: '3', hoverClass: 'hover:bg-blue-900/40 hover:border-blue-700 hover:text-blue-400' },
-  { id: 'easy', label: 'Fácil', key: '4', hoverClass: 'hover:bg-green-900/40 hover:border-green-700 hover:text-green-400' },
+const RATING_POINTS: Record<Rating, number> = { again: 0, hard: 5, ok: 10, easy: 15 };
+
+const RATING_BUTTONS: { id: Rating; label: string; key: string; hoverClass: string; points: number }[] = [
+  { id: 'again', label: 'De novo', key: '1', hoverClass: 'hover:bg-red-900/40 hover:border-red-700 hover:text-red-400', points: 0 },
+  { id: 'hard', label: 'Difícil', key: '2', hoverClass: 'hover:bg-orange-900/40 hover:border-orange-700 hover:text-orange-400', points: 5 },
+  { id: 'ok', label: 'Ok', key: '3', hoverClass: 'hover:bg-blue-900/40 hover:border-blue-700 hover:text-blue-400', points: 10 },
+  { id: 'easy', label: 'Fácil', key: '4', hoverClass: 'hover:bg-green-900/40 hover:border-green-700 hover:text-green-400', points: 15 },
 ];
 
 @Component({
@@ -54,6 +56,10 @@ export class StudyScreenComponent {
   readonly sessionStats = signal<SessionStats>({ easy: 0, ok: 0, hard: 0, again: 0 });
   readonly error = signal('');
   readonly submitting = signal(false);
+  readonly sessionPoints = signal(0);
+  readonly lastPoints = signal(0);
+  readonly showPoints = signal(false);
+  readonly totalScore = this.storage.score;
 
   readonly current = computed<Phrase | null>(() => this.phrases()[this.index()] ?? null);
 
@@ -122,6 +128,12 @@ export class StudyScreenComponent {
 
     // Atualiza a UI imediatamente (sem esperar o back).
     this.sessionStats.update((s) => ({ ...s, [rating]: s[rating] + 1 }));
+    const pts = RATING_POINTS[rating];
+    this.sessionPoints.update((p) => p + pts);
+    this.lastPoints.set(pts);
+    this.showPoints.set(true);
+    setTimeout(() => this.showPoints.set(false), 900);
+    this.storage.updateStats(rating);
     this.flipped.set(false);
     if (isLast) this.done.set(true);
     else this.index.update((i) => i + 1);

@@ -16,6 +16,11 @@
     <span class="font-mono text-[10px] text-ink-600 tracking-wide">
       v{{ version }}
     </span>
+    @if (score() > 0) {
+      <span class="font-mono text-[10px] text-amber-500/50 tracking-wide">
+        ✦ {{ score() }} pts
+      </span>
+    }
   </div>
 
   <div class="no-drag flex items-center gap-1">

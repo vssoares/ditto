@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { ElectronService } from '../../services/electron.service';
 import { TooltipComponent } from '../../core/components/tooltip/tooltip.component';
 import { LayoutMenuService } from '../../services/layout-menu.service';
+import { StorageService } from '../../services/storage.service';
 import packageJson from '../../../../package.json';
 import { filter } from 'rxjs/operators';
 
@@ -16,6 +17,8 @@ export class TitleBarComponent {
   readonly electron = inject(ElectronService);
   private readonly router = inject(Router);
   private readonly menu = inject(LayoutMenuService);
+  private readonly storage = inject(StorageService);
+  readonly score = this.storage.score;
   readonly url = signal<string>(this.router.url);
   readonly showMobileMenuButton = computed(() =>
     this.url().includes('/app/') && !this.url().includes('/app/study')

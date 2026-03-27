@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import type { Phrase, StudyStats } from '../ui/utils/types';
+import { Injectable, signal } from '@angular/core';
+import type { Phrase, Rating, StudyStats } from '../ui/utils/types';
 
 const KEYS = {
   PHRASES: 'ditto_phrases',
@@ -9,10 +9,15 @@ const KEYS = {
   AUTH_USER: 'ditto_auth_user',
 } as const;
 
-const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0 };
+const RATING_POINTS: Record<Rating, number> = { again: 0, hard: 5, ok: 10, easy: 15 };
+
+const defaultStats: StudyStats = { reviewed: 0, easy: 0, hard: 0, score: 0 };
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
+  private readonly _score = signal(this.getStats().score);
+  readonly score = this._score.asReadonly();
+
   getPhrases(): Phrase[] {
     try {
       return (JSON.parse(localStorage.getItem(KEYS.PHRASES) ?? 'null') as Phrase[] | null) ?? [];
@@ -40,12 +45,14 @@ export class StorageService {
     localStorage.setItem(KEYS.STATS, JSON.stringify(stats));
   }
 
-  updateStats(type: 'easy' | 'hard'): StudyStats {
+  updateStats(rating: Rating): StudyStats {
     const stats = this.getStats();
     stats.reviewed = (stats.reviewed || 0) + 1;
-    if (type === 'easy') stats.easy = (stats.easy || 0) + 1;
-    if (type === 'hard') stats.hard = (stats.hard || 0) + 1;
+    if (rating === 'easy') stats.easy = (stats.easy || 0) + 1;
+    if (rating === 'hard') stats.hard = (stats.hard || 0) + 1;
+    stats.score = (stats.score || 0) + RATING_POINTS[rating];
     this.setStats(stats);
+    this._score.set(stats.score);
     return stats;
   }
 
