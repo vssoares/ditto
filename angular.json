@@ -25,7 +25,7 @@
               "src/styles.css"
             ],
             "scripts": [],
-            "baseHref": "./"
+            "baseHref": "/"
           },
           "configurations": {
             "production": {
